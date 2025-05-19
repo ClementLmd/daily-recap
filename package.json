@@ -1,0 +1,40 @@
+{
+  "name": "root",
+  "version": "1.0.0",
+  "workspaces": [
+    "front",
+    "back"
+  ],
+  "packageManager": "pnpm@9.1.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "start": "pnpm run back & pnpm run front",
+    "back": "pnpm --prefix back run nodemon",
+    "front": "pnpm --prefix front dev",
+    "test": "turbo run test",
+    "test-front": "pnpm --prefix front test",
+    "test-back": "pnpm --prefix back test",
+    "build": "turbo run build",
+    "build-front": "pnpm --prefix front build",
+    "build-back": "pnpm --prefix back build",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "turbo run lint",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {},
+  "husky": {
+    "hooks": {
+      "pre-commit": "pnpm lint"
+    }
+  },
+  "devDependencies": {
+    "husky": "^9.1.6",
+    "turbo": "^2.3.4"
+  }
+}
