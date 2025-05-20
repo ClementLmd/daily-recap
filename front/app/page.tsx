@@ -16,32 +16,25 @@ export default function Home() {
   const dispatch = useAppDispatch();
   const categories = useAppSelector((state) => state.categories.categories);
 
-  useEffect(() => {
-    console.log("Current state:", categories);
-  }, [categories]);
+  useEffect(() => {}, [categories]);
 
   const handleAddCategory = (categoryName: string) => {
-    console.log("Adding category:", categoryName);
     dispatch(addCategory(categoryName));
   };
 
   const handleIncrement = (categoryName: string) => {
-    console.log("Incrementing:", categoryName);
     dispatch(incrementCount(categoryName));
   };
 
   const handleDecrement = (categoryName: string) => {
-    console.log("Decrementing:", categoryName);
     dispatch(decrementCount(categoryName));
   };
 
   const handleCountChange = (categoryName: string, value: number) => {
-    console.log("Setting count:", { categoryName, value });
     dispatch(setCount({ categoryName, value }));
   };
 
   const handleDone = (categoryName: string) => {
-    console.log("Saving count:", categoryName);
     dispatch(saveCount(categoryName));
   };
 

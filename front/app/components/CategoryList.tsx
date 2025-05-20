@@ -16,6 +16,16 @@ export default function CategoryList({
   onDone,
   onCountChange,
 }: CategoryListProps) {
+  if (categories.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500 text-lg">
+          No categories yet. Add some categories to get started!
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {categories.map((category) => (
