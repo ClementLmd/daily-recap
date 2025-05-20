@@ -17,7 +17,7 @@
       "./node_modules/@types",
       "../node_modules/@types"
     ],
-    "types": ["express", "node"]
+    "types": ["express", "node", "jest"]
   },
   "include": ["api/**/*", "api/types/**/*.d.ts"],
   "exclude": ["node_modules", ".vercel"]

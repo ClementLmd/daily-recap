@@ -6,8 +6,7 @@ import express, { Request, Response } from "express";
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
-// import usersRoute from "./routes/usersRoute";
+import categoryRoutes from "./routes/categoryRoutes";
 
 const app = express();
 
@@ -28,5 +27,8 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello World");
 });
 // app.use("/users", usersRoute);
+
+// Routes
+app.use("/api/categories", categoryRoutes);
 
 export default app;

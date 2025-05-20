@@ -1,3 +1,19 @@
 //hello world
-http://localhost:5000/
+# GET http://localhost:5000/
 
+# //add category
+# POST http://localhost:5000/api/categories
+# Content-Type: application/json
+
+# {
+#   "name": "Example from REST client"
+# }
+
+//add progress
+POST http://localhost:5000/api/categories/682c441279f021a5ffc4c531/progress
+Content-Type: application/json
+
+{
+  "value": 30,
+  "notes": "Read chapter 5"
+}
