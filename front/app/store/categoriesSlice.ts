@@ -1,5 +1,11 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { api } from "../services/api";
+import { createSlice } from "@reduxjs/toolkit";
+import { CategoriesState } from "./types";
+import {
+  fetchCategories,
+  addCategory,
+  saveProgress,
+  deleteCategory,
+} from "./thunks";
 
 export interface Category {
   _id: string;
@@ -15,61 +21,11 @@ export interface ProgressEntry {
   notes?: string;
 }
 
-export interface CategoriesState {
-  categories: Category[];
-  loading: boolean;
-  error: string | null;
-}
-
 const initialState: CategoriesState = {
   categories: [],
   loading: false,
   error: null,
 };
-
-// Async thunks
-export const fetchCategories = createAsyncThunk(
-  "categories/fetchCategories",
-  async () => {
-    const response = await api.getCategories();
-    return response.data.map((cat) => ({
-      _id: cat._id,
-      name: cat.name,
-      count: cat.count,
-      tempCount: 0,
-      progress: cat.progress,
-    }));
-  }
-);
-
-export const addCategory = createAsyncThunk(
-  "categories/addCategory",
-  async (name: string) => {
-    const response = await api.addCategory(name);
-    return {
-      ...response.data,
-      count: 0,
-      tempCount: 0,
-      progress: [],
-    };
-  }
-);
-
-export const saveProgress = createAsyncThunk(
-  "categories/saveProgress",
-  async ({ categoryId, count }: { categoryId: string; count: number }) => {
-    await api.addProgress(categoryId, count);
-    return { categoryId, count };
-  }
-);
-
-export const deleteCategory = createAsyncThunk(
-  "categories/deleteCategory",
-  async (categoryId: string) => {
-    await api.deleteCategory(categoryId);
-    return categoryId;
-  }
-);
 
 export const categoriesSlice = createSlice({
   name: "categories",
@@ -81,6 +37,12 @@ export const categoriesSlice = createSlice({
       );
       if (category) {
         category.tempCount += 1;
+        // Store updated temp count in localStorage
+        const storedTempCounts = JSON.parse(
+          localStorage.getItem("tempCounts") || "{}"
+        );
+        storedTempCounts[category._id] = category.tempCount;
+        localStorage.setItem("tempCounts", JSON.stringify(storedTempCounts));
       }
     },
     decrementCount: (state, action) => {
@@ -89,6 +51,12 @@ export const categoriesSlice = createSlice({
       );
       if (category) {
         category.tempCount = Math.max(0, category.tempCount - 1);
+        // Store updated temp count in localStorage
+        const storedTempCounts = JSON.parse(
+          localStorage.getItem("tempCounts") || "{}"
+        );
+        storedTempCounts[category._id] = category.tempCount;
+        localStorage.setItem("tempCounts", JSON.stringify(storedTempCounts));
       }
     },
     setCount: (state, action) => {
@@ -97,6 +65,12 @@ export const categoriesSlice = createSlice({
       );
       if (category) {
         category.tempCount = Math.max(0, action.payload.value);
+        // Store updated temp count in localStorage
+        const storedTempCounts = JSON.parse(
+          localStorage.getItem("tempCounts") || "{}"
+        );
+        storedTempCounts[category._id] = category.tempCount;
+        localStorage.setItem("tempCounts", JSON.stringify(storedTempCounts));
       }
     },
   },
@@ -127,6 +101,17 @@ export const categoriesSlice = createSlice({
         if (category) {
           category.count += action.payload.count;
           category.tempCount = 0;
+          category.progress.push({
+            value: action.payload.count,
+            date: new Date().toISOString(),
+            notes: action.payload.notes,
+          });
+          // Clear the temp count from localStorage
+          const storedTempCounts = JSON.parse(
+            localStorage.getItem("tempCounts") || "{}"
+          );
+          delete storedTempCounts[category._id];
+          localStorage.setItem("tempCounts", JSON.stringify(storedTempCounts));
         }
       })
       .addCase(deleteCategory.fulfilled, (state, action) => {

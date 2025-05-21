@@ -42,7 +42,8 @@ export const api = {
   // Add progress to a category
   addProgress: async (
     categoryId: string,
-    value: number
+    value: number,
+    notes: string | undefined
   ): Promise<ApiResponse<CategoryResponse>> => {
     const response = await fetch(
       `${API_BASE_URL}/categories/${categoryId}/progress`,
@@ -51,7 +52,7 @@ export const api = {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ value }),
+        body: JSON.stringify({ value, notes }),
       }
     );
     if (!response.ok) throw new Error("Failed to add progress");

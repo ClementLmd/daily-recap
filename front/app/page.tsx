@@ -1,10 +1,10 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "./store/hooks";
-import { addCategory } from "./store/categoriesSlice";
 import CategoryForm from "./components/CategoryForm";
 import CategoryList from "./components/CategoryList";
 import { useEffect } from "react";
+import { addCategory } from "./store/thunks";
 
 export default function Home() {
   const dispatch = useAppDispatch();

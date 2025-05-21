@@ -2,14 +2,12 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import {
-  fetchCategories,
   incrementCount,
   decrementCount,
   setCount,
-  saveProgress,
-  deleteCategory,
 } from "../store/categoriesSlice";
 import Link from "next/link";
+import { deleteCategory, fetchCategories, saveProgress } from "../store/thunks";
 
 export default function CategoryList() {
   const dispatch = useDispatch<AppDispatch>();
@@ -53,8 +51,18 @@ export default function CategoryList() {
 
   const handleDone = async (categoryId: string) => {
     const category = categories.find((cat) => cat._id === categoryId);
-    if (category) {
-      await dispatch(saveProgress({ categoryId, count: category.tempCount }));
+    if (category && category.tempCount > 0) {
+      const notesInput = document.getElementById(
+        `notes-${categoryId}`
+      ) as HTMLInputElement;
+      const notes = notesInput?.value || "";
+      await dispatch(
+        saveProgress({ categoryId, count: category.tempCount, notes })
+      );
+      // Clear the notes input
+      if (notesInput) {
+        notesInput.value = "";
+      }
     }
   };
 
@@ -106,37 +114,47 @@ export default function CategoryList() {
             </div>
           </div>
 
-          <div className="mt-4 flex items-center space-x-4">
-            <button
-              onClick={() => handleDecrement(category._id)}
-              className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-            >
-              -
-            </button>
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => handleDecrement(category._id)}
+                className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              >
+                -
+              </button>
+
+              <input
+                type="number"
+                min="0"
+                value={category.tempCount}
+                onChange={(e) =>
+                  handleCountChange(category._id, parseInt(e.target.value) || 0)
+                }
+                className="w-20 px-2 py-1 text-center text-gray-800 border border-gray-300 rounded-md [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+
+              <button
+                onClick={() => handleIncrement(category._id)}
+                className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              >
+                +
+              </button>
+
+              <button
+                onClick={() => handleDone(category._id)}
+                disabled={category.tempCount === 0}
+                className="ml-auto px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Done
+              </button>
+            </div>
 
             <input
-              type="number"
-              min="0"
-              value={category.tempCount}
-              onChange={(e) =>
-                handleCountChange(category._id, parseInt(e.target.value) || 0)
-              }
-              className="w-20 px-2 py-1 text-center text-gray-800 border border-gray-300 rounded-md [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              id={`notes-${category._id}`}
+              type="text"
+              placeholder="Add notes (optional)"
+              className="w-full px-3 py-2 text-sm text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-
-            <button
-              onClick={() => handleIncrement(category._id)}
-              className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-            >
-              +
-            </button>
-
-            <button
-              onClick={() => handleDone(category._id)}
-              className="ml-auto px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-            >
-              Done
-            </button>
           </div>
         </div>
       ))}
