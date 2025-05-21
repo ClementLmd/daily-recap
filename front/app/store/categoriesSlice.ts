@@ -48,6 +48,7 @@ export const addCategory = createAsyncThunk(
     const response = await api.addCategory(name);
     return {
       ...response.data,
+      count: 0,
       tempCount: 0,
       progress: [],
     };

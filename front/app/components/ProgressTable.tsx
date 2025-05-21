@@ -21,6 +21,14 @@ export default function ProgressTable({ progress }: ProgressTableProps) {
     currentPage * itemsPerPage
   );
 
+  if (progress.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        No progress entries yet. Start tracking your progress to see it here!
+      </div>
+    );
+  }
+
   return (
     <div className="mt-8">
       <div className="overflow-x-auto">
