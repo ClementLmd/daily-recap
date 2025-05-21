@@ -3,6 +3,8 @@ import categoriesReducer, { CategoriesState } from "./categoriesSlice";
 
 const initialState: CategoriesState = {
   categories: [],
+  loading: false,
+  error: null,
 };
 
 const makeStore = () => {

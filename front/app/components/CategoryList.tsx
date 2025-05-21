@@ -1,21 +1,33 @@
-import { Category } from "../store/categoriesSlice";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
+import {
+  fetchCategories,
+  incrementCount,
+  decrementCount,
+  setCount,
+  saveProgress,
+} from "../store/categoriesSlice";
 import Link from "next/link";
 
-interface CategoryListProps {
-  categories: Category[];
-  onIncrement: (categoryName: string) => void;
-  onDecrement: (categoryName: string) => void;
-  onDone: (categoryName: string) => void;
-  onCountChange: (categoryName: string, value: number) => void;
-}
+export default function CategoryList() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { categories, loading, error } = useSelector(
+    (state: RootState) => state.categories
+  );
 
-export default function CategoryList({
-  categories,
-  onIncrement,
-  onDecrement,
-  onDone,
-  onCountChange,
-}: CategoryListProps) {
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
+
+  if (loading) {
+    return <div className="text-center py-8">Loading categories...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-8 text-red-500">{error}</div>;
+  }
+
   if (categories.length === 0) {
     return (
       <div className="text-center py-8">
@@ -26,11 +38,30 @@ export default function CategoryList({
     );
   }
 
+  const handleIncrement = (categoryId: string) => {
+    dispatch(incrementCount(categoryId));
+  };
+
+  const handleDecrement = (categoryId: string) => {
+    dispatch(decrementCount(categoryId));
+  };
+
+  const handleCountChange = (categoryId: string, value: number) => {
+    dispatch(setCount({ categoryId, value }));
+  };
+
+  const handleDone = async (categoryId: string) => {
+    const category = categories.find((cat) => cat._id === categoryId);
+    if (category) {
+      await dispatch(saveProgress({ categoryId, count: category.tempCount }));
+    }
+  };
+
   return (
     <div className="space-y-4">
       {categories.map((category) => (
         <div
-          key={category.name}
+          key={category._id}
           className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
         >
           <div className="flex items-center justify-between">
@@ -52,7 +83,7 @@ export default function CategoryList({
 
           <div className="mt-4 flex items-center space-x-4">
             <button
-              onClick={() => onDecrement(category.name)}
+              onClick={() => handleDecrement(category._id)}
               className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
             >
               -
@@ -63,20 +94,20 @@ export default function CategoryList({
               min="0"
               value={category.tempCount}
               onChange={(e) =>
-                onCountChange(category.name, parseInt(e.target.value) || 0)
+                handleCountChange(category._id, parseInt(e.target.value) || 0)
               }
               className="w-20 px-2 py-1 text-center text-gray-800 border border-gray-300 rounded-md [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
 
             <button
-              onClick={() => onIncrement(category.name)}
+              onClick={() => handleIncrement(category._id)}
               className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
             >
               +
             </button>
 
             <button
-              onClick={() => onDone(category.name)}
+              onClick={() => handleDone(category._id)}
               className="ml-auto px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
             >
               Done

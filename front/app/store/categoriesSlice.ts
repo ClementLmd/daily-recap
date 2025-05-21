@@ -1,6 +1,8 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { api } from "../services/api";
 
 export interface Category {
+  _id: string;
   name: string;
   count: number;
   tempCount: number; // Temporary count before saving
@@ -8,71 +10,111 @@ export interface Category {
 
 export interface CategoriesState {
   categories: Category[];
+  loading: boolean;
+  error: string | null;
 }
 
 const initialState: CategoriesState = {
   categories: [],
+  loading: false,
+  error: null,
 };
+
+// Async thunks
+export const fetchCategories = createAsyncThunk(
+  "categories/fetchCategories",
+  async () => {
+    const response = await api.getCategories();
+    return response.data.map((cat) => ({
+      _id: cat._id,
+      name: cat.name,
+      count: cat.count,
+      tempCount: 0,
+    }));
+  }
+);
+
+export const addCategory = createAsyncThunk(
+  "categories/addCategory",
+  async (name: string) => {
+    const response = await api.addCategory(name);
+    return {
+      ...response,
+      tempCount: 0,
+    };
+  }
+);
+
+export const saveProgress = createAsyncThunk(
+  "categories/saveProgress",
+  async ({ categoryId, count }: { categoryId: string; count: number }) => {
+    await api.addProgress(categoryId, count);
+    return { categoryId, count };
+  }
+);
 
 export const categoriesSlice = createSlice({
   name: "categories",
   initialState,
   reducers: {
-    addCategory: (state, action: PayloadAction<string>) => {
-      const categoryName = action.payload;
-      if (!state.categories.some((cat) => cat.name === categoryName)) {
-        state.categories.push({
-          name: categoryName,
-          count: 0,
-          tempCount: 0,
-        });
-      }
-    },
-    incrementCount: (state, action: PayloadAction<string>) => {
+    incrementCount: (state, action) => {
       const category = state.categories.find(
-        (cat) => cat.name === action.payload
+        (cat) => cat._id === action.payload
       );
       if (category) {
         category.tempCount += 1;
       }
     },
-    decrementCount: (state, action: PayloadAction<string>) => {
+    decrementCount: (state, action) => {
       const category = state.categories.find(
-        (cat) => cat.name === action.payload
+        (cat) => cat._id === action.payload
       );
       if (category) {
         category.tempCount = Math.max(0, category.tempCount - 1);
       }
     },
-    setCount: (
-      state,
-      action: PayloadAction<{ categoryName: string; value: number }>
-    ) => {
+    setCount: (state, action) => {
       const category = state.categories.find(
-        (cat) => cat.name === action.payload.categoryName
+        (cat) => cat._id === action.payload.categoryId
       );
       if (category) {
         category.tempCount = Math.max(0, action.payload.value);
       }
     },
-    saveCount: (state, action: PayloadAction<string>) => {
-      const category = state.categories.find(
-        (cat) => cat.name === action.payload
-      );
-      if (category) {
-        category.count += category.tempCount;
-        category.tempCount = 0;
-      }
-    },
+  },
+  extraReducers: (builder) => {
+    builder
+      // Fetch categories
+      .addCase(fetchCategories.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.loading = false;
+        state.categories = action.payload;
+      })
+      .addCase(fetchCategories.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch categories";
+      })
+      // Add category
+      .addCase(addCategory.fulfilled, (state, action) => {
+        state.categories.push(action.payload);
+      })
+      // Save progress
+      .addCase(saveProgress.fulfilled, (state, action) => {
+        const category = state.categories.find(
+          (cat) => cat._id === action.payload.categoryId
+        );
+        if (category) {
+          category.count += action.payload.count;
+          category.tempCount = 0;
+        }
+      });
   },
 });
 
-export const {
-  addCategory,
-  incrementCount,
-  decrementCount,
-  setCount,
-  saveCount,
-} = categoriesSlice.actions;
+export const { incrementCount, decrementCount, setCount } =
+  categoriesSlice.actions;
 
 export default categoriesSlice.reducer;

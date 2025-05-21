@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { addCategory } from "../useCases/category/addCategory";
 import { deleteCategory } from "../useCases/category/deleteCategory";
 import { addProgress } from "../useCases/category/addProgress";
+import { getCategories } from "../useCases/category/getCategories";
 
 export const addCategoryController = async (req: Request, res: Response) => {
   try {
@@ -113,6 +114,22 @@ export const addProgressController = async (req: Request, res: Response) => {
     res.status(500).json({
       status: "error",
       message: "Failed to add progress",
+    });
+  }
+};
+
+export const getCategoriesController = async (req: Request, res: Response) => {
+  try {
+    const categories = await getCategories();
+
+    res.status(200).json({
+      status: "success",
+      data: categories,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch categories",
     });
   }
 };

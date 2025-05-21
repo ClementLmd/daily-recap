@@ -3,9 +3,13 @@ import {
   addCategoryController,
   deleteCategoryController,
   addProgressController,
+  getCategoriesController,
 } from "../controllers/categoryController";
 
 const router = Router();
+
+// Get all categories
+router.get("/", getCategoriesController);
 
 // Add a new category
 router.post("/", addCategoryController);

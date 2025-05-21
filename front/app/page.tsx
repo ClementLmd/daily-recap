@@ -1,13 +1,7 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "./store/hooks";
-import {
-  addCategory,
-  incrementCount,
-  decrementCount,
-  setCount,
-  saveCount,
-} from "./store/categoriesSlice";
+import { addCategory } from "./store/categoriesSlice";
 import CategoryForm from "./components/CategoryForm";
 import CategoryList from "./components/CategoryList";
 import { useEffect } from "react";
@@ -20,22 +14,6 @@ export default function Home() {
 
   const handleAddCategory = (categoryName: string) => {
     dispatch(addCategory(categoryName));
-  };
-
-  const handleIncrement = (categoryName: string) => {
-    dispatch(incrementCount(categoryName));
-  };
-
-  const handleDecrement = (categoryName: string) => {
-    dispatch(decrementCount(categoryName));
-  };
-
-  const handleCountChange = (categoryName: string, value: number) => {
-    dispatch(setCount({ categoryName, value }));
-  };
-
-  const handleDone = (categoryName: string) => {
-    dispatch(saveCount(categoryName));
   };
 
   return (
@@ -51,13 +29,7 @@ export default function Home() {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Your Categories
           </h2>
-          <CategoryList
-            categories={categories}
-            onIncrement={handleIncrement}
-            onDecrement={handleDecrement}
-            onDone={handleDone}
-            onCountChange={handleCountChange}
-          />
+          <CategoryList />
         </div>
       </div>
     </div>
