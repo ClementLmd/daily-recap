@@ -5,10 +5,17 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface ProgressEntry {
+  value: number;
+  date: string;
+  notes?: string;
+}
+
 export interface CategoryResponse {
   _id: string;
   name: string;
   count: number;
+  progress: ProgressEntry[];
 }
 
 export const api = {

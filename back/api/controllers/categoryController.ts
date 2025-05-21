@@ -122,9 +122,17 @@ export const getCategoriesController = async (req: Request, res: Response) => {
   try {
     const categories = await getCategories();
 
+    // Transform the response to include the total count
+    const categoriesWithCount = categories.map((category) => ({
+      _id: category._id,
+      name: category.name,
+      count: category.progress.reduce((sum, entry) => sum + entry.value, 0),
+      progress: category.progress,
+    }));
+
     res.status(200).json({
       status: "success",
-      data: categories,
+      data: categoriesWithCount,
     });
   } catch (error) {
     res.status(500).json({
