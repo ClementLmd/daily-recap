@@ -27,7 +27,7 @@ export const api = {
   },
 
   // Add a new category
-  addCategory: async (name: string): Promise<CategoryResponse> => {
+  addCategory: async (name: string): Promise<ApiResponse<CategoryResponse>> => {
     const response = await fetch(`${API_BASE_URL}/categories`, {
       method: "POST",
       headers: {
@@ -59,10 +59,11 @@ export const api = {
   },
 
   // Delete a category
-  deleteCategory: async (categoryId: string): Promise<void> => {
+  deleteCategory: async (categoryId: string): Promise<ApiResponse<void>> => {
     const response = await fetch(`${API_BASE_URL}/categories/${categoryId}`, {
       method: "DELETE",
     });
     if (!response.ok) throw new Error("Failed to delete category");
+    return response.json();
   },
 };

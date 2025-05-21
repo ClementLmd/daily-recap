@@ -39,7 +39,7 @@ export const addCategory = createAsyncThunk(
   async (name: string) => {
     const response = await api.addCategory(name);
     return {
-      ...response,
+      ...response.data,
       tempCount: 0,
     };
   }
@@ -50,6 +50,14 @@ export const saveProgress = createAsyncThunk(
   async ({ categoryId, count }: { categoryId: string; count: number }) => {
     await api.addProgress(categoryId, count);
     return { categoryId, count };
+  }
+);
+
+export const deleteCategory = createAsyncThunk(
+  "categories/deleteCategory",
+  async (categoryId: string) => {
+    await api.deleteCategory(categoryId);
+    return categoryId;
   }
 );
 
@@ -110,6 +118,11 @@ export const categoriesSlice = createSlice({
           category.count += action.payload.count;
           category.tempCount = 0;
         }
+      })
+      .addCase(deleteCategory.fulfilled, (state, action) => {
+        state.categories = state.categories.filter(
+          (cat) => cat._id !== action.payload
+        );
       });
   },
 });
