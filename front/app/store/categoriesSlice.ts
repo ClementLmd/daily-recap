@@ -6,6 +6,13 @@ export interface Category {
   name: string;
   count: number;
   tempCount: number; // Temporary count before saving
+  progress: ProgressEntry[];
+}
+
+export interface ProgressEntry {
+  value: number;
+  date: string;
+  notes?: string;
 }
 
 export interface CategoriesState {
@@ -30,6 +37,7 @@ export const fetchCategories = createAsyncThunk(
       name: cat.name,
       count: cat.count,
       tempCount: 0,
+      progress: cat.progress,
     }));
   }
 );
@@ -41,6 +49,7 @@ export const addCategory = createAsyncThunk(
     return {
       ...response.data,
       tempCount: 0,
+      progress: [],
     };
   }
 );
