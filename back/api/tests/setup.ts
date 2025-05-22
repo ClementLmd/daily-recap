@@ -2,16 +2,17 @@ import "dotenv/config";
 import { config } from "dotenv";
 import path from "path";
 import mongoose from "mongoose";
-import { connectToDatabase } from "../models/connection";
+import {
+  connectToDatabase,
+  disconnectFromDatabase,
+} from "../models/connection";
 
 // Load test environment variables
 config({ path: path.resolve(__dirname, "../.env.test") });
 
-const TEST_DB_URI = process.env.TEST_DB_URI;
-
-if (!TEST_DB_URI) {
-  throw new Error("TEST_DB_URI environment variable is not set");
-}
+// Set test database URI
+process.env.MONGODB_URI =
+  process.env.TEST_DB_URI || "mongodb://localhost:27017/daily-recap-test";
 
 beforeAll(async () => {
   await connectToDatabase();
@@ -25,5 +26,5 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-  await mongoose.disconnect();
+  await disconnectFromDatabase();
 });

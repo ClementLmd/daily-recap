@@ -1,43 +1,37 @@
 import mongoose from "mongoose";
 
-let databaseEnvironment: "test" | "production" | "development";
+let isConnected = false;
 
-const defineConnectionString = () => {
-  const testSuffix = process.env.JEST_WORKER_ID
-    ? `_${process.env.JEST_WORKER_ID}`
-    : "";
-
-  if (process.env.NODE_ENV === "test") {
-    databaseEnvironment = "test";
-    return `${process.env.CONNECTION_STRING_TEST}${testSuffix}`;
+export const connectToDatabase = async () => {
+  if (isConnected) {
+    return;
   }
 
-  if (process.env.NODE_ENV === "development") {
-    databaseEnvironment = "development";
-    return process.env.CONNECTION_STRING_DEV;
+  try {
+    const connectionString =
+      process.env.MONGODB_URI || "mongodb://localhost:27017/daily-recap";
+    await mongoose.connect(connectionString);
+    isConnected = true;
+    console.log("Database connected successfully");
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    throw error;
   }
-
-  databaseEnvironment = "production";
-  return process.env.CONNECTION_STRING;
 };
 
-const connectionString = defineConnectionString();
+export const disconnectFromDatabase = async () => {
+  if (!isConnected) {
+    return;
+  }
 
-if (!connectionString) {
-  throw new Error(
-    "MongoDB connection string is undefined. Check your environment variables."
-  );
-}
-
-export const connectToDatabase = () => {
-  mongoose
-    .connect(connectionString, { connectTimeoutMS: 2000 })
-    .then(() => {
-      if (process.env.NODE_ENV !== "production") {
-        console.log(`Database connected - ${databaseEnvironment}`);
-      }
-    })
-    .catch((error) => console.error(error));
+  try {
+    await mongoose.disconnect();
+    isConnected = false;
+    console.log("Database disconnected successfully");
+  } catch (error) {
+    console.error("MongoDB disconnection error:", error);
+    throw error;
+  }
 };
 
 process.on("SIGTERM", async () => {
