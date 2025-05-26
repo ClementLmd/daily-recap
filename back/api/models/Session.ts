@@ -37,15 +37,15 @@ const sessionSchema = new Schema<ISession>(
     deviceInfo: {
       userAgent: {
         type: String,
-        required: true,
+        required: false,
       },
       ipAddress: {
         type: String,
-        required: true,
+        required: false,
       },
       deviceId: {
         type: String,
-        required: true,
+        required: false,
       },
     },
     expiresAt: {

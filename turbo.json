@@ -16,7 +16,7 @@
     },
     "test": {
       "dependsOn": ["build"],
-      "env": ["NODE_ENV", "CONNECTION_STRING_TEST", "NEXT_PUBLIC_API_URL"]
+      "env": ["NODE_ENV", "CONNECTION_STRING_TEST", "NEXT_PUBLIC_BACKEND_URL"]
     },
     "lint": {
       "outputs": []
