@@ -29,8 +29,9 @@ export default function CategoryForm({ onSubmit }: CategoryFormProps) {
           id="categoryName"
           value={categoryName}
           onChange={(e) => setCategoryName(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-4 py-3 text-gray-800 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm"
           placeholder="Enter category name"
+          maxLength={50}
           required
         />
       </div>
