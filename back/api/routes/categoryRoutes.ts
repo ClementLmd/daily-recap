@@ -1,23 +1,29 @@
 import { Router } from "express";
-import {
-  addCategoryController,
-  deleteCategoryController,
-  addProgressController,
-  getCategoriesController,
-} from "../controllers/categoryController";
+import { categoryController } from "../controllers/categoryController";
+import { requireAuth, csrfProtection } from "../middleware/auth";
 
 const router = Router();
 
 // Get all categories
-router.get("/", getCategoriesController);
+router.get("/", requireAuth, categoryController.getCategories);
 
 // Add a new category
-router.post("/", addCategoryController);
+router.post("/", requireAuth, csrfProtection, categoryController.addCategory);
 
 // Delete a category
-router.delete("/:id", deleteCategoryController);
+router.delete(
+  "/:categoryId",
+  requireAuth,
+  csrfProtection,
+  categoryController.deleteCategory
+);
 
-// Add progress to a category
-router.post("/:id/progress", addProgressController);
+// Update category progress
+router.post(
+  "/:categoryId/progress",
+  requireAuth,
+  csrfProtection,
+  categoryController.updateProgress
+);
 
 export default router;

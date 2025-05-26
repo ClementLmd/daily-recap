@@ -12,13 +12,14 @@ config({ path: path.resolve(__dirname, "../.env.test") });
 
 // Set test database URI
 process.env.MONGODB_URI =
-  process.env.TEST_DB_URI || "mongodb://localhost:27017/daily-recap-test";
+  process.env.TEST_MONGODB_URI || "mongodb://localhost:27017/daily-recap-test";
 
 beforeAll(async () => {
   await connectToDatabase();
 });
 
 beforeEach(async () => {
+  // Clear all collections before each test
   const collections = mongoose.connection.collections;
   for (const key in collections) {
     await collections[key].deleteMany({});

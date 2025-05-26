@@ -8,7 +8,6 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import categoryRoutes from "./routes/categoryRoutes";
 import authRoutes from "./routes/auth";
-import mongoose from "mongoose";
 import { startSessionCleanupJob } from "./utils/sessionCleanup";
 
 const app = express();
@@ -35,10 +34,10 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World");
 });
-// app.use("/users", usersRoute);
 
 // Routes
 app.use("/api/categories", categoryRoutes);
@@ -57,17 +56,7 @@ app.use(
   }
 );
 
-// Connect to MongoDB
-//explain
-mongoose
-  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/daily-recap")
-  .then(() => {
-    console.log("Connected to MongoDB");
-    // Start session cleanup job
-    startSessionCleanupJob();
-  })
-  .catch((error) => {
-    console.error("MongoDB connection error:", error);
-  });
+// Start session cleanup job
+startSessionCleanupJob();
 
 export default app;

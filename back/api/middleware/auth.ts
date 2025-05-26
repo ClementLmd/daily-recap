@@ -23,7 +23,10 @@ export const requireAuth = async (
     const sessionToken = req.cookies.session;
 
     if (!sessionToken) {
-      return res.status(401).json({ message: "Authentication required" });
+      return res.status(401).json({
+        status: "error",
+        message: "Authentication required",
+      });
     }
 
     // Find and validate session
@@ -33,7 +36,10 @@ export const requireAuth = async (
     });
 
     if (!session || session.isExpired()) {
-      return res.status(401).json({ message: "Invalid or expired session" });
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid or expired session",
+      });
     }
 
     // Update last activity
@@ -51,7 +57,10 @@ export const requireAuth = async (
     // Attach user and session to request
     const user = await User.findById(session.userId);
     if (!user) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(401).json({
+        status: "error",
+        message: "User not found",
+      });
     }
 
     req.user = user;
@@ -59,7 +68,10 @@ export const requireAuth = async (
     next();
   } catch (error) {
     console.error("Auth middleware error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
   }
 };
 
@@ -73,7 +85,10 @@ export const csrfProtection = (
   const sessionToken = req.cookies.session;
 
   if (!csrfToken || !sessionToken) {
-    return res.status(403).json({ message: "CSRF token missing" });
+    return res.status(403).json({
+      status: "error",
+      message: "CSRF token missing",
+    });
   }
 
   // Generate expected CSRF token from session token
@@ -82,7 +97,10 @@ export const csrfProtection = (
     .digest("hex");
 
   if (csrfToken !== expectedToken) {
-    return res.status(403).json({ message: "Invalid CSRF token" });
+    return res.status(403).json({
+      status: "error",
+      message: "Invalid CSRF token",
+    });
   }
 
   next();

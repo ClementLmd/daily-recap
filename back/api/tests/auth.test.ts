@@ -1,5 +1,4 @@
 import request from "supertest";
-import mongoose from "mongoose";
 import app from "../app";
 import { User } from "../models/User";
 import { Session } from "../models/Session";
@@ -24,7 +23,7 @@ describe("Authentication", () => {
 
     it("should login successfully with valid credentials", async () => {
       const response = await request(app)
-        .post("/auth/login")
+        .post("/api/auth/login")
         .send({
           email: testUser.email,
           password: testUser.password,
@@ -39,7 +38,7 @@ describe("Authentication", () => {
     });
 
     it("should fail with invalid credentials", async () => {
-      const response = await request(app).post("/auth/login").send({
+      const response = await request(app).post("/api/auth/login").send({
         email: testUser.email,
         password: "wrongpassword",
       });
@@ -51,7 +50,7 @@ describe("Authentication", () => {
     it("should lock account after 5 failed attempts", async () => {
       for (let i = 0; i < 5; i++) {
         await request(app)
-          .post("/auth/login")
+          .post("/api/auth/login")
           .send({
             email: testUser.email,
             password: "wrongpassword",
@@ -61,7 +60,7 @@ describe("Authentication", () => {
       }
 
       const response = await request(app)
-        .post("/auth/login")
+        .post("/api/auth/login")
         .send({
           email: testUser.email,
           password: testUser.password,
@@ -111,7 +110,7 @@ describe("Authentication", () => {
 
     it("should logout successfully", async () => {
       const response = await request(app)
-        .post("/auth/logout")
+        .post("/api/auth/logout")
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken);
 
@@ -121,7 +120,7 @@ describe("Authentication", () => {
 
     it("should fail without CSRF token", async () => {
       const response = await request(app)
-        .post("/auth/logout")
+        .post("/api/auth/logout")
         .set("Cookie", [`session=${sessionToken}`]);
 
       expect(response.status).toBe(403);
@@ -160,7 +159,7 @@ describe("Authentication", () => {
 
     it("should return user data for valid session", async () => {
       const response = await request(app)
-        .get("/auth/check")
+        .get("/api/auth/check")
         .set("Cookie", [`session=${sessionToken}`]);
 
       expect(response.status).toBe(200);
@@ -170,7 +169,7 @@ describe("Authentication", () => {
 
     it("should fail with invalid session", async () => {
       const response = await request(app)
-        .get("/auth/check")
+        .get("/api/auth/check")
         .set("Cookie", ["session=invalid-token"]);
 
       expect(response.status).toBe(401);
@@ -209,7 +208,7 @@ describe("Authentication", () => {
 
     it("should revoke all sessions", async () => {
       const response = await request(app)
-        .post("/auth/revoke-all")
+        .post("/api/auth/revoke-all")
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken);
 

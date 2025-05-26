@@ -1,143 +1,169 @@
 import { Request, Response } from "express";
-import { addCategory } from "../useCases/category/addCategory";
-import { deleteCategory } from "../useCases/category/deleteCategory";
-import { addProgress } from "../useCases/category/addProgress";
-import { getCategories } from "../useCases/category/getCategories";
+import { User, Category, ProgressEntry } from "../models/User";
 
-export const addCategoryController = async (req: Request, res: Response) => {
-  try {
-    const { name } = req.body;
+export const categoryController = {
+  // Get all categories for the authenticated user
+  getCategories: async (req: Request, res: Response) => {
+    try {
+      const user = await User.findById(req.user?._id);
+      if (!user) {
+        return res.status(404).json({
+          status: "error",
+          message: "User not found",
+        });
+      }
 
-    if (!name) {
-      return res.status(400).json({
+      res.json({
+        status: "success",
+        data: user.categories,
+      });
+    } catch (error) {
+      console.error("Error getting categories:", error);
+      res.status(500).json({
         status: "error",
-        message: "Category name is required",
+        message: "Failed to get categories",
       });
     }
+  },
 
-    const category = await addCategory({ name });
+  // Add a new category
+  addCategory: async (req: Request, res: Response) => {
+    try {
+      const { name } = req.body;
 
-    res.status(201).json({
-      status: "success",
-      data: category,
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.message === "A category with this name already exists") {
+      if (!name) {
+        return res.status(400).json({
+          status: "error",
+          message: "Category name is required",
+        });
+      }
+
+      const user = await User.findById(req.user?._id);
+      if (!user) {
+        return res.status(404).json({
+          status: "error",
+          message: "User not found",
+        });
+      }
+
+      // Check if category name already exists
+      if (user.categories.some((cat) => cat.name === name)) {
         return res.status(409).json({
           status: "error",
-          message: error.message,
+          message: "A category with this name already exists",
         });
       }
-    }
 
-    res.status(500).json({
-      status: "error",
-      message: "Failed to create category",
-    });
-  }
-};
+      const newCategory: Category = {
+        name: name.trim(),
+        progress: [],
+      };
 
-export const deleteCategoryController = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
+      user.categories.push(newCategory);
+      await user.save();
 
-    if (!id) {
-      return res.status(400).json({
+      res.status(201).json({
+        status: "success",
+        data: newCategory,
+      });
+    } catch (error) {
+      console.error("Error adding category:", error);
+      res.status(500).json({
         status: "error",
-        message: "Category ID is required",
+        message: "Failed to add category",
       });
     }
+  },
 
-    await deleteCategory({ id });
-
-    res.status(200).json({
-      status: "success",
-      message: "Category deleted successfully",
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.message === "Category not found") {
+  // Delete a category
+  deleteCategory: async (req: Request, res: Response) => {
+    try {
+      const { categoryId } = req.params;
+      const user = await User.findById(req.user?._id);
+      if (!user) {
         return res.status(404).json({
           status: "error",
-          message: error.message,
+          message: "User not found",
         });
       }
-    }
 
-    res.status(500).json({
-      status: "error",
-      message: "Failed to delete category",
-    });
-  }
-};
+      const categoryIndex = user.categories.findIndex(
+        (cat) => cat.name === categoryId
+      );
 
-export const addProgressController = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { value, notes } = req.body;
-
-    if (!id) {
-      return res.status(400).json({
-        status: "error",
-        message: "Category ID is required",
-      });
-    }
-
-    if (typeof value !== "number" || value < 0) {
-      return res.status(400).json({
-        status: "error",
-        message: "Valid progress value is required",
-      });
-    }
-
-    const category = await addProgress({
-      categoryId: id,
-      value,
-      notes,
-    });
-
-    res.status(200).json({
-      status: "success",
-      data: category,
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.message === "Category not found") {
+      if (categoryIndex === -1) {
         return res.status(404).json({
           status: "error",
-          message: error.message,
+          message: "Category not found",
         });
       }
+
+      user.categories.splice(categoryIndex, 1);
+      await user.save();
+
+      res.json({
+        status: "success",
+        message: "Category deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(500).json({
+        status: "error",
+        message: "Failed to delete category",
+      });
     }
+  },
 
-    res.status(500).json({
-      status: "error",
-      message: "Failed to add progress",
-    });
-  }
-};
+  // Update category progress
+  updateProgress: async (req: Request, res: Response) => {
+    try {
+      const { categoryId } = req.params;
+      const { value, notes } = req.body;
 
-export const getCategoriesController = async (req: Request, res: Response) => {
-  try {
-    const categories = await getCategories();
+      if (typeof value !== "number" || value < 0) {
+        return res.status(400).json({
+          status: "error",
+          message:
+            "Progress value is required and must be a non-negative number",
+        });
+      }
 
-    // Transform the response to include the total count
-    const categoriesWithCount = categories.map((category) => ({
-      _id: category._id,
-      name: category.name,
-      count: category.progress.reduce((sum, entry) => sum + entry.value, 0),
-      progress: category.progress,
-    }));
+      const user = await User.findById(req.user?._id);
+      if (!user) {
+        return res.status(404).json({
+          status: "error",
+          message: "User not found",
+        });
+      }
 
-    res.status(200).json({
-      status: "success",
-      data: categoriesWithCount,
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      message: "Failed to fetch categories",
-    });
-  }
+      const category = user.categories.find((cat) => cat.name === categoryId);
+
+      if (!category) {
+        return res.status(404).json({
+          status: "error",
+          message: "Category not found",
+        });
+      }
+
+      const newProgress: ProgressEntry = {
+        value,
+        date: new Date(),
+        notes,
+      };
+
+      category.progress.push(newProgress);
+      await user.save();
+
+      res.json({
+        status: "success",
+        data: category,
+      });
+    } catch (error) {
+      console.error("Error updating progress:", error);
+      res.status(500).json({
+        status: "error",
+        message: "Failed to update progress",
+      });
+    }
+  },
 };
