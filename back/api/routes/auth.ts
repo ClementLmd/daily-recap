@@ -4,6 +4,7 @@ import {
   logout,
   checkSession,
   revokeAllSessions,
+  register,
 } from "../controllers/authController";
 import {
   loginLimiter,
@@ -15,6 +16,7 @@ import {
 const router = Router();
 
 // Public routes
+router.post("/register", register);
 router.post("/login", loginLimiter, trackDevice, login);
 router.post("/logout", requireAuth, csrfProtection, logout);
 router.get("/check", requireAuth, checkSession);

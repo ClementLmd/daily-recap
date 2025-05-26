@@ -33,7 +33,7 @@ app.get("/", (req: Request, res: Response) => {
 
 // Routes
 app.use("/api/categories", categoryRoutes);
-app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 
 // Error handling middleware
 app.use(

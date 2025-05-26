@@ -3,6 +3,31 @@ import { User } from "../models/User";
 import { Session } from "../models/Session";
 import { createHash } from "crypto";
 
+export const register = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    // Create new user
+    const user = new User({
+      email,
+      password, // The password will be hashed by the User model's pre-save hook
+    });
+
+    await user.save();
+
+    res.status(201).json({ message: "Registration successful" });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
