@@ -50,19 +50,33 @@ describe("Authentication", () => {
 
     it("should lock account after 5 failed attempts", async () => {
       for (let i = 0; i < 5; i++) {
-        await request(app).post("/auth/login").send({
-          email: testUser.email,
-          password: "wrongpassword",
-        });
+        await request(app)
+          .post("/auth/login")
+          .send({
+            email: testUser.email,
+            password: "wrongpassword",
+          })
+          .set("x-device-id", "test-device")
+          .set("user-agent", "test-agent");
       }
 
-      const response = await request(app).post("/auth/login").send({
-        email: testUser.email,
-        password: testUser.password,
-      });
+      const response = await request(app)
+        .post("/auth/login")
+        .send({
+          email: testUser.email,
+          password: testUser.password,
+        })
+        .set("x-device-id", "test-device")
+        .set("user-agent", "test-agent");
 
-      expect(response.status).toBe(401);
-      expect(response.body.message).toContain("Account is locked");
+      expect(response.status).toBe(429);
+      expect(response.text).toContain(
+        "Too many login attempts, please try again after 15 minutes"
+      );
+
+      // Verify user is locked in database
+      const lockedUser = await User.findOne({ email: testUser.email });
+      expect(lockedUser?.isLocked).toBe(true);
     });
   });
 
