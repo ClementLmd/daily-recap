@@ -8,8 +8,10 @@ export interface ProgressEntry {
 }
 
 export interface Category {
+  _id: string;
   name: string;
   progress: ProgressEntry[];
+  count: number;
 }
 
 export interface IUser extends Document {
@@ -61,6 +63,10 @@ const categorySchema = new Schema<Category>({
     trim: true,
   },
   progress: [progressEntrySchema],
+  count: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const userSchema = new Schema<IUser>(

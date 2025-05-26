@@ -29,6 +29,8 @@ export const updateProgress = async (
     notes,
   };
 
+  // Update the total count
+  category.count += value;
   category.progress.push(newProgress);
   await user.save();
 

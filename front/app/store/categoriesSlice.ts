@@ -91,7 +91,9 @@ export const categoriesSlice = createSlice({
       })
       // Add category
       .addCase(addCategory.fulfilled, (state, action) => {
-        state.categories.push(action.payload);
+        if (action.payload) {
+          state.categories.push(action.payload);
+        }
       })
       // Save progress
       .addCase(saveProgress.fulfilled, (state, action) => {
@@ -99,7 +101,8 @@ export const categoriesSlice = createSlice({
           (cat) => cat._id === action.payload.categoryId
         );
         if (category) {
-          category.count += action.payload.count;
+          // Update with the new count from the backend
+          category.count = action.payload.count;
           category.tempCount = 0;
           category.progress.push({
             value: action.payload.count,

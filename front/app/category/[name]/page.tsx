@@ -22,7 +22,7 @@ export default function CategoryPage() {
             Category Not Found
           </h1>
           <Link
-            href="/"
+            href="/dashboard"
             className="block text-center text-blue-600 hover:text-blue-800 hover:underline"
           >
             ← Back to Home
@@ -38,7 +38,7 @@ export default function CategoryPage() {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900">{category.name}</h1>
           <Link
-            href="/"
+            href="/dashboard"
             className="text-blue-600 hover:text-blue-800 hover:underline"
           >
             ← Back

@@ -250,17 +250,17 @@ describe("Category Integration Tests", () => {
         .expect(200);
 
       expect(response.body.status).toBe("success");
-      expect(response.body.data).toHaveLength(3);
+      expect(response.body.categories).toHaveLength(3);
 
       // Verify category with progress
-      const categoryWithProgress = response.body.data.find(
+      const categoryWithProgress = response.body.categories.find(
         (cat: any) => cat.name === "Category 1"
       );
       expect(categoryWithProgress.progress[0].value).toBe(10);
       expect(categoryWithProgress.progress).toHaveLength(1);
 
       // Verify categories without progress
-      const categoriesWithoutProgress = response.body.data.filter(
+      const categoriesWithoutProgress = response.body.categories.filter(
         (cat: any) => cat.name !== "Category 1"
       );
       categoriesWithoutProgress.forEach((cat: any) => {

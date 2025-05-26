@@ -1,71 +1,123 @@
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+import { Category } from "../store/types";
 
-export interface ApiResponse<T> {
+interface ApiResponse<T> {
+  apiResponseData: T;
+  status: number;
+  message?: string;
+}
+
+interface BackendResponse<T> {
   status: string;
-  data: T;
+  data?: T;
+  categories?: Category[];
+  newCategory?: Category;
+  updatedCategory?: Category;
 }
 
-export interface ProgressEntry {
-  value: number;
-  date: string;
-  notes?: string;
-}
+class Api {
+  private baseUrl: string;
 
-export interface CategoryResponse {
-  _id: string;
-  name: string;
-  count: number;
-  progress: ProgressEntry[];
-}
+  constructor() {
+    this.baseUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+  }
 
-export const api = {
-  // Get all categories
-  getCategories: async (): Promise<ApiResponse<CategoryResponse[]>> => {
-    const response = await fetch(`${API_BASE_URL}/categories`);
-    if (!response.ok) throw new Error("Failed to fetch categories");
-    return response.json();
-  },
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {},
+    csrfToken?: string | null
+  ): Promise<ApiResponse<T>> {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...((options.headers as Record<string, string>) || {}),
+    };
 
-  // Add a new category
-  addCategory: async (name: string): Promise<ApiResponse<CategoryResponse>> => {
-    const response = await fetch(`${API_BASE_URL}/categories`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name }),
+    if (csrfToken) {
+      headers["X-CSRF-Token"] = csrfToken;
+    }
+
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      ...options,
+      headers,
+      credentials: "include",
     });
-    if (!response.ok) throw new Error("Failed to add category");
-    return response.json();
-  },
 
-  // Add progress to a category
-  addProgress: async (
-    categoryId: string,
-    value: number,
-    notes: string | undefined
-  ): Promise<ApiResponse<CategoryResponse>> => {
-    const response = await fetch(
-      `${API_BASE_URL}/categories/${categoryId}/progress`,
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "API request failed");
+    }
+
+    return {
+      apiResponseData: data,
+      status: response.status,
+    };
+  }
+
+  async getCategories(
+    csrfToken?: string | null
+  ): Promise<ApiResponse<BackendResponse<Category[]>>> {
+    return this.request<BackendResponse<Category[]>>(
+      "/categories",
+      {
+        method: "GET",
+      },
+      csrfToken
+    );
+  }
+
+  async addCategory(
+    name: string,
+    csrfToken?: string | null
+  ): Promise<ApiResponse<BackendResponse<Category>>> {
+    return this.request<BackendResponse<Category>>(
+      "/categories",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ value, notes }),
-      }
+        body: JSON.stringify({ name }),
+      },
+      csrfToken
     );
-    if (!response.ok) throw new Error("Failed to add progress");
-    return response.json();
-  },
+  }
 
-  // Delete a category
-  deleteCategory: async (categoryId: string): Promise<ApiResponse<void>> => {
-    const response = await fetch(`${API_BASE_URL}/categories/${categoryId}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) throw new Error("Failed to delete category");
-    return response.json();
-  },
-};
+  async saveProgress(
+    payload: { categoryId: string; count: number; notes?: string },
+    csrfToken?: string | null
+  ): Promise<ApiResponse<BackendResponse<Category>>> {
+    // Get the category name from the store
+    const category = (
+      await this.getCategories(csrfToken)
+    ).apiResponseData.categories?.find((cat) => cat._id === payload.categoryId);
+
+    if (!category) {
+      throw new Error("Category not found");
+    }
+
+    return this.request<BackendResponse<Category>>(
+      `/categories/${encodeURIComponent(category.name)}/progress`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          value: payload.count,
+          notes: payload.notes,
+        }),
+      },
+      csrfToken
+    );
+  }
+
+  async deleteCategory(
+    categoryId: string,
+    csrfToken?: string | null
+  ): Promise<ApiResponse<BackendResponse<void>>> {
+    return this.request<BackendResponse<void>>(
+      `/categories/${categoryId}`,
+      {
+        method: "DELETE",
+      },
+      csrfToken
+    );
+  }
+}
+
+export const api = new Api();

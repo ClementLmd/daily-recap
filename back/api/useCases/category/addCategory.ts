@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { User, Category } from "../../models/User";
 
 export const addCategory = async (userId: string, name: string) => {
@@ -16,8 +17,10 @@ export const addCategory = async (userId: string, name: string) => {
   }
 
   const newCategory: Category = {
+    _id: new mongoose.Types.ObjectId().toString(),
     name: name.trim(),
     progress: [],
+    count: 0,
   };
 
   user.categories.push(newCategory);

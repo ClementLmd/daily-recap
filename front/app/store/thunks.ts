@@ -1,17 +1,19 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { api } from "../services/api";
 import { Category, SaveProgressPayload } from "./types";
+import { RootState } from "./store";
 
 export const fetchCategories = createAsyncThunk(
   "categories/fetchCategories",
-  async () => {
-    const response = await api.getCategories();
+  async (_, { getState }) => {
+    const state = getState() as RootState;
+    const response = await api.getCategories(state.auth.csrfToken);
     // Get stored temp counts from localStorage
     const storedTempCounts = JSON.parse(
       localStorage.getItem("tempCounts") || "{}"
     );
 
-    return response.data.map((cat) => ({
+    return (response.apiResponseData.categories || []).map((cat: Category) => ({
       _id: cat._id,
       name: cat.name,
       count: cat.count,
@@ -23,29 +25,38 @@ export const fetchCategories = createAsyncThunk(
 
 export const addCategory = createAsyncThunk(
   "categories/addCategory",
-  async (name: string) => {
-    const response = await api.addCategory(name);
-    return {
-      ...response.data,
-      count: 0,
-      tempCount: 0,
-      progress: [],
-    };
+  async (name: string, { getState }) => {
+    const state = getState() as RootState;
+    const response = await api.addCategory(name, state.auth.csrfToken);
+    if (response.apiResponseData.newCategory) {
+      return {
+        ...response.apiResponseData.newCategory,
+        tempCount: 0,
+      };
+    }
+    return null;
   }
 );
 
 export const saveProgress = createAsyncThunk(
   "categories/saveProgress",
-  async ({ categoryId, count, notes }: SaveProgressPayload) => {
-    await api.addProgress(categoryId, count, notes);
-    return { categoryId, count, notes };
+  async (payload: SaveProgressPayload, { getState }) => {
+    const state = getState() as RootState;
+    const response = await api.saveProgress(payload, state.auth.csrfToken);
+    return {
+      categoryId:
+        response.apiResponseData.updatedCategory?._id || payload.categoryId,
+      count: response.apiResponseData.updatedCategory?.count || 0,
+      notes: payload.notes,
+    };
   }
 );
 
 export const deleteCategory = createAsyncThunk(
   "categories/deleteCategory",
-  async (categoryId: string) => {
-    await api.deleteCategory(categoryId);
+  async (categoryId: string, { getState }) => {
+    const state = getState() as RootState;
+    await api.deleteCategory(categoryId, state.auth.csrfToken);
     return categoryId;
   }
 );

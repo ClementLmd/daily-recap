@@ -26,7 +26,7 @@ export const categoryController = {
       const categories = await getCategories(req.user._id.toString());
       res.json({
         status: "success",
-        data: categories,
+        categories,
       });
     } catch (error) {
       res.status(500).json({
@@ -50,7 +50,7 @@ export const categoryController = {
 
       res.status(201).json({
         status: "success",
-        data: newCategory,
+        newCategory,
       });
     } catch (error) {
       const customError = error as CustomError;
@@ -125,7 +125,7 @@ export const categoryController = {
 
       res.json({
         status: "success",
-        data: updatedCategory,
+        updatedCategory,
       });
     } catch (error) {
       const customError = error as CustomError;

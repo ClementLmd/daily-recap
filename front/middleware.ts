@@ -19,20 +19,21 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // For POST, PUT, DELETE requests, verify CSRF token
-  if (["POST", "PUT", "DELETE"].includes(request.method)) {
-    const csrfToken = request.headers.get("X-CSRF-Token");
-    const csrfCookie = request.cookies.get("csrf-token");
-
-    if (!csrfToken || !csrfCookie || csrfToken !== csrfCookie.value) {
+  // For API routes, verify CSRF token
+  if (pathname.startsWith("/api/")) {
+    const csrfToken = request.headers.get("x-csrf-token");
+    if (!csrfToken) {
       return new NextResponse(
-        JSON.stringify({ message: "Invalid CSRF token" }),
+        JSON.stringify({ message: "CSRF token missing" }),
         { status: 403, headers: { "Content-Type": "application/json" } }
       );
     }
   }
 
-  return NextResponse.next();
+  // Add a response header to indicate the request is authenticated
+  const response = NextResponse.next();
+  response.headers.set("x-auth-status", "authenticated");
+  return response;
 }
 
 // Configure which paths the middleware should run on
@@ -40,11 +41,12 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - public folder
+     * - api (API routes are handled by the backend)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico|public/|api/).*)",
   ],
 };

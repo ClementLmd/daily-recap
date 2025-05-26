@@ -1,13 +1,13 @@
 import { User } from "../../models/User";
 
-export const deleteCategory = async (userId: string, categoryName: string) => {
+export const deleteCategory = async (userId: string, categoryId: string) => {
   const user = await User.findById(userId);
   if (!user) {
     throw new Error("User not found");
   }
 
   const categoryIndex = user.categories.findIndex(
-    (cat) => cat.name === categoryName
+    (cat) => cat._id.toString() === categoryId
   );
 
   if (categoryIndex === -1) {

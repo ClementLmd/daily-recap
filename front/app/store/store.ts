@@ -1,5 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
-import categoriesReducer, { CategoriesState } from "./categoriesSlice";
+import categoriesReducer from "./categoriesSlice";
+import authReducer from "./authSlice";
+import { CategoriesState } from "./types";
 
 const initialState: CategoriesState = {
   categories: [],
@@ -11,6 +13,7 @@ const makeStore = () => {
   return configureStore({
     reducer: {
       categories: categoriesReducer,
+      auth: authReducer,
     },
     preloadedState: {
       categories: initialState,
