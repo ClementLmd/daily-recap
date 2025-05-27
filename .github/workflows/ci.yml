@@ -63,7 +63,7 @@ jobs:
       - name: Run tests
         run: |
           echo "Starting tests..."
-          pnpm test -- --verbose
+          pnpm test -- -- --verbose
         env:
           DEBUG: "*"
 
