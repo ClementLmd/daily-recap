@@ -30,7 +30,7 @@
   "dependencies": {},
   "husky": {
     "hooks": {
-      "pre-commit": "pnpm lint"
+      "pre-commit": "echo 'Running pre-commit checks...' && pnpm typecheck && pnpm test && pnpm lint"
     }
   },
   "devDependencies": {
