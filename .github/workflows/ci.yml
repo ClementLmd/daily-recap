@@ -13,7 +13,6 @@ jobs:
     env:
       NODE_ENV: test
       TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
-      JEST_TIMEOUT: 30000
 
     steps:
       - uses: actions/checkout@v4
@@ -64,8 +63,12 @@ jobs:
           cat back/jest.config.js
 
       - name: Run tests
-        run: pnpm test
+        run: |
+          echo "Starting tests..."
+          echo "TEST_MONGODB_URI is set: ${{ secrets.TEST_MONGODB_URI != '' }}"
+          pnpm test
         env:
+          NODE_ENV: test
           TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
 
       - name: Build
