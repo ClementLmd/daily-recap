@@ -10,6 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      NODE_ENV: test
+      TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
+
     steps:
       - uses: actions/checkout@v4
 
