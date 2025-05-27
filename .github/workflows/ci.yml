@@ -64,12 +64,9 @@ jobs:
           cat back/jest.config.js
 
       - name: Run tests
-        run: |
-          echo "Starting tests..."
-          cd back && NODE_ENV=test TEST_MONGODB_URI=${{ secrets.TEST_MONGODB_URI }} pnpm test -- -- --verbose --testTimeout=30000
+        run: pnpm test
         env:
-          DEBUG: "*"
-          NODE_OPTIONS: "--max-old-space-size=4096"
+          TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
 
       - name: Build
         run: pnpm build
