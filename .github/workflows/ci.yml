@@ -66,7 +66,7 @@ jobs:
         run: |
           echo "Starting tests..."
           echo "TEST_MONGODB_URI is set: ${{ secrets.TEST_MONGODB_URI != '' }}"
-          pnpm test
+          cd back && NODE_ENV=test TEST_MONGODB_URI=${{ secrets.TEST_MONGODB_URI }} pnpm test
         env:
           NODE_ENV: test
           TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
