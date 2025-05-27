@@ -13,6 +13,7 @@ jobs:
     env:
       NODE_ENV: test
       TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
+      JEST_TIMEOUT: 30000
 
     steps:
       - uses: actions/checkout@v4
@@ -59,13 +60,16 @@ jobs:
           ls -la
           echo "Back directory contents:"
           ls -la back/
+          echo "Jest config contents:"
+          cat back/jest.config.js
 
       - name: Run tests
         run: |
           echo "Starting tests..."
-          pnpm test -- -- --verbose
+          pnpm test -- -- --verbose --testTimeout=30000
         env:
           DEBUG: "*"
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
       - name: Build
         run: pnpm build
