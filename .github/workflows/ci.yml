@@ -50,26 +50,8 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Debug environment
-        run: |
-          echo "NODE_ENV: $NODE_ENV"
-          echo "TEST_MONGODB_URI is set: ${{ secrets.TEST_MONGODB_URI != '' }}"
-          echo "Current directory: $(pwd)"
-          echo "Directory contents:"
-          ls -la
-          echo "Back directory contents:"
-          ls -la back/
-          echo "Jest config contents:"
-          cat back/jest.config.js
-
       - name: Run tests
-        run: |
-          echo "Starting tests..."
-          echo "TEST_MONGODB_URI is set: ${{ secrets.TEST_MONGODB_URI != '' }}"
-          cd back && NODE_ENV=test TEST_MONGODB_URI=${{ secrets.TEST_MONGODB_URI }} pnpm test
-        env:
-          NODE_ENV: test
-          TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
+        run: cd back && NODE_ENV=test TEST_MONGODB_URI=${{ secrets.TEST_MONGODB_URI }} pnpm test
 
       - name: Build
         run: pnpm build
