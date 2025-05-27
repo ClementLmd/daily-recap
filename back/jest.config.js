@@ -7,6 +7,7 @@ module.exports = {
   transform: {
     "^.+\\.ts$": "ts-jest",
   },
+  maxWorkers: 1,
   verbose: true,
   forceExit: true,
   clearMocks: true,

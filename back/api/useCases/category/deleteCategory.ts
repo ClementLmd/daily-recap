@@ -6,9 +6,7 @@ export const deleteCategory = async (userId: string, categoryId: string) => {
     throw new Error("User not found");
   }
 
-  const categoryIndex = user.categories.findIndex(
-    (cat) => cat._id.toString() === categoryId
-  );
+  const categoryIndex = user.categories.findIndex((cat) => cat._id.toString() === categoryId);
 
   if (categoryIndex === -1) {
     throw new Error("Category not found");

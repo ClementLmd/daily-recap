@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ProgressEntry } from "../services/api";
+import { ProgressEntry } from "../store/types";
 
 interface ProgressTableProps {
   progress: ProgressEntry[];
@@ -12,13 +12,13 @@ export default function ProgressTable({ progress }: ProgressTableProps) {
 
   // Sort progress by date, most recent first
   const sortedProgress = [...progress].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
   // Get current page items
   const currentItems = sortedProgress.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   if (progress.length === 0) {
@@ -52,12 +52,8 @@ export default function ProgressTable({ progress }: ProgressTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {new Date(entry.date).toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {entry.value}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {entry.notes || "-"}
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.value}</td>
+                <td className="px-6 py-4 text-sm text-gray-900">{entry.notes || "-"}</td>
               </tr>
             ))}
           </tbody>
@@ -78,9 +74,7 @@ export default function ProgressTable({ progress }: ProgressTableProps) {
             Page {currentPage} of {totalPages}
           </span>
           <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
             className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >

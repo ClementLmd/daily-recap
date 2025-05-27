@@ -19,7 +19,7 @@ export default function Dashboard() {
       try {
         await dispatch(checkSession()).unwrap();
       } catch (error) {
-        console.error("Session check failed:", error);
+        // Handle session check failure silently
         router.push("/login");
       }
     };
@@ -35,7 +35,8 @@ export default function Dashboard() {
       await dispatch(logout()).unwrap();
       router.push("/");
     } catch (error) {
-      console.error("Logout failed:", error);
+      // Handle logout failure silently
+      router.push("/login");
     }
   };
 

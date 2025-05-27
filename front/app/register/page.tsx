@@ -8,9 +8,7 @@ export default function RegisterPage() {
         <div className="bg-white p-8 rounded-lg shadow-md">
           <RegisterForm />
           <div className="mt-4 text-center">
-            <AuthButton href="/login">
-              Already have an account? Login here
-            </AuthButton>
+            <AuthButton href="/login">Already have an account? Login here</AuthButton>
           </div>
         </div>
       </div>

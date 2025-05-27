@@ -4,10 +4,7 @@ let isConnected = false;
 
 const getConnectionString = () => {
   if (process.env.NODE_ENV === "test") {
-    return (
-      process.env.TEST_MONGODB_URI ||
-      "mongodb://localhost:27017/daily-recap-test"
-    );
+    return process.env.TEST_MONGODB_URI || "mongodb://localhost:27017/daily-recap-test";
   }
   return process.env.MONGODB_URI || "mongodb://localhost:27017/daily-recap";
 };
@@ -22,7 +19,7 @@ export const connectToDatabase = async () => {
     await mongoose.connect(connectionString);
     isConnected = true;
     console.log(
-      `Database connected successfully to ${process.env.NODE_ENV || "development"} environment`
+      `Database connected successfully to ${process.env.NODE_ENV || "development"} environment`,
     );
   } catch (error) {
     console.error("MongoDB connection error:", error);

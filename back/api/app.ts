@@ -17,13 +17,7 @@ const corsOptions = {
   origin: process.env.FRONTEND_URL || "http://localhost:3000",
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "Cookie",
-    "X-CSRF-Token",
-    "X-Requested-With",
-  ],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie", "X-CSRF-Token", "X-Requested-With"],
   exposedHeaders: ["set-cookie"],
   preflightContinue: false,
   optionsSuccessStatus: 204,
@@ -49,11 +43,12 @@ app.use(
     err: Error,
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _next: express.NextFunction,
   ) => {
     console.error(err.stack);
     res.status(500).json({ message: "Something went wrong!" });
-  }
+  },
 );
 
 // Start session cleanup job

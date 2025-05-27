@@ -4,12 +4,10 @@ export const updateProgress = async (
   userId: string,
   categoryName: string,
   value: number,
-  notes?: string
+  notes?: string,
 ) => {
   if (typeof value !== "number" || value < 0) {
-    throw new Error(
-      "Progress value is required and must be a non-negative number"
-    );
+    throw new Error("Progress value is required and must be a non-negative number");
   }
 
   const user = await User.findById(userId);

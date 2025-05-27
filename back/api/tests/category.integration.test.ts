@@ -2,6 +2,8 @@ import request from "supertest";
 import app from "../app";
 import { User, IUser } from "../models/User";
 import mongoose from "mongoose";
+import { Session } from "../models/Session";
+import { createHash } from "crypto";
 
 describe("Category Integration Tests", () => {
   let testUser: IUser & { _id: mongoose.Types.ObjectId };
@@ -17,9 +19,9 @@ describe("Category Integration Tests", () => {
     })) as IUser & { _id: mongoose.Types.ObjectId };
 
     // Create a session for the test user
-    const session = await require("../models/Session").Session.create({
+    const session = await Session.create({
       userId: testUser._id,
-      token: require("../models/Session").Session.generateToken(),
+      token: Session.generateToken(),
       deviceInfo: {
         userAgent: "test-agent",
         ipAddress: "127.0.0.1",
@@ -29,8 +31,7 @@ describe("Category Integration Tests", () => {
     });
 
     sessionToken = session.token;
-    csrfToken = require("crypto")
-      .createHash("sha256")
+    csrfToken = createHash("sha256")
       .update(sessionToken + process.env.CSRF_SECRET)
       .digest("hex");
   });
@@ -49,7 +50,7 @@ describe("Category Integration Tests", () => {
         .expect(201);
 
       expect(response.body.status).toBe("success");
-      expect(response.body.data.name).toBe(categoryData.name);
+      expect(response.body.newCategory.name).toBe(categoryData.name);
     });
 
     it("should return 401 if not authenticated", async () => {
@@ -57,10 +58,7 @@ describe("Category Integration Tests", () => {
         name: "Test Category",
       };
 
-      const response = await request(app)
-        .post("/api/categories")
-        .send(categoryData)
-        .expect(401);
+      const response = await request(app).post("/api/categories").send(categoryData).expect(401);
 
       expect(response.body.status).toBe("error");
       expect(response.body.message).toBe("Authentication required");
@@ -100,9 +98,7 @@ describe("Category Integration Tests", () => {
         .expect(409);
 
       expect(response.body.status).toBe("error");
-      expect(response.body.message).toBe(
-        "A category with this name already exists"
-      );
+      expect(response.body.message).toBe("A category with this name already exists");
     });
 
     it("should trim whitespace from category name", async () => {
@@ -117,7 +113,7 @@ describe("Category Integration Tests", () => {
         .set("x-csrf-token", csrfToken)
         .expect(201);
 
-      expect(response.body.data.name).toBe("Trimmed Category");
+      expect(response.body.newCategory.name).toBe("Trimmed Category");
     });
   });
 
@@ -125,16 +121,18 @@ describe("Category Integration Tests", () => {
     it("should delete an existing category", async () => {
       // Create a test category
       const categoryName = "Test Category";
-      await request(app)
+      const createResponse = await request(app)
         .post("/api/categories")
         .send({ name: categoryName })
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(201);
 
+      const categoryId = createResponse.body.newCategory._id;
+
       // Delete the category
       const response = await request(app)
-        .delete(`/api/categories/${categoryName}`)
+        .delete(`/api/categories/${categoryId}`)
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(200);
@@ -144,14 +142,12 @@ describe("Category Integration Tests", () => {
 
       // Verify the category is deleted
       const user = await User.findById(testUser._id);
-      expect(
-        user?.categories.find((cat) => cat.name === categoryName)
-      ).toBeUndefined();
+      expect(user?.categories.find((cat) => cat._id.toString() === categoryId)).toBeUndefined();
     });
 
     it("should return 404 if category is not found", async () => {
       const response = await request(app)
-        .delete("/api/categories/nonexistent")
+        .delete("/api/categories/507f1f77bcf86cd799439011") // A non-existent MongoDB ID
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(404);
@@ -188,11 +184,11 @@ describe("Category Integration Tests", () => {
         .expect(200);
 
       expect(response.body.status).toBe("success");
-      expect(response.body.data.name).toBe(categoryName);
-      expect(response.body.data.progress).toHaveLength(1);
-      expect(response.body.data.progress[0].value).toBe(progressData.value);
-      expect(response.body.data.progress[0].notes).toBe(progressData.notes);
-      expect(response.body.data.progress[0].date).toBeDefined();
+      expect(response.body.updatedCategory.name).toBe(categoryName);
+      expect(response.body.updatedCategory.progress).toHaveLength(1);
+      expect(response.body.updatedCategory.progress[0].value).toBe(progressData.value);
+      expect(response.body.updatedCategory.progress[0].notes).toBe(progressData.notes);
+      expect(response.body.updatedCategory.progress[0].date).toBeDefined();
     });
 
     it("should return 400 if value is missing", async () => {
@@ -205,7 +201,7 @@ describe("Category Integration Tests", () => {
 
       expect(response.body.status).toBe("error");
       expect(response.body.message).toBe(
-        "Progress value is required and must be a non-negative number"
+        "Progress value is required and must be a non-negative number",
       );
     });
 
@@ -254,18 +250,20 @@ describe("Category Integration Tests", () => {
 
       // Verify category with progress
       const categoryWithProgress = response.body.categories.find(
-        (cat: any) => cat.name === "Category 1"
+        (cat: { name: string; progress: Array<{ value: number }> }) => cat.name === "Category 1",
       );
       expect(categoryWithProgress.progress[0].value).toBe(10);
       expect(categoryWithProgress.progress).toHaveLength(1);
 
       // Verify categories without progress
       const categoriesWithoutProgress = response.body.categories.filter(
-        (cat: any) => cat.name !== "Category 1"
+        (cat: { name: string; progress: Array<{ value: number }> }) => cat.name !== "Category 1",
       );
-      categoriesWithoutProgress.forEach((cat: any) => {
-        expect(cat.progress).toHaveLength(0);
-      });
+      categoriesWithoutProgress.forEach(
+        (cat: { name: string; progress: Array<{ value: number }> }) => {
+          expect(cat.progress).toHaveLength(0);
+        },
+      );
     });
 
     it("should return 401 if not authenticated", async () => {

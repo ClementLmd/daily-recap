@@ -23,10 +23,10 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith("/api/")) {
     const csrfToken = request.headers.get("x-csrf-token");
     if (!csrfToken) {
-      return new NextResponse(
-        JSON.stringify({ message: "CSRF token missing" }),
-        { status: 403, headers: { "Content-Type": "application/json" } }
-      );
+      return new NextResponse(JSON.stringify({ message: "CSRF token missing" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
     }
   }
 

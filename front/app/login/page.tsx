@@ -8,9 +8,7 @@ export default function LoginPage() {
         <div className="bg-white p-8 rounded-lg shadow-md">
           <LoginForm />
           <div className="mt-4 text-center">
-            <AuthButton href="/register">
-              Don't have an account? Register here
-            </AuthButton>
+            <AuthButton href="/register">Don&apos;t have an account? Register here</AuthButton>
           </div>
         </div>
       </div>

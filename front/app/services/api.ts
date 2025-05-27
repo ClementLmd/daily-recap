@@ -18,14 +18,13 @@ class Api {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+    this.baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
   }
 
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
-    csrfToken?: string | null
+    csrfToken?: string | null,
   ): Promise<ApiResponse<T>> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -55,20 +54,20 @@ class Api {
   }
 
   async getCategories(
-    csrfToken?: string | null
+    csrfToken?: string | null,
   ): Promise<ApiResponse<BackendResponse<Category[]>>> {
     return this.request<BackendResponse<Category[]>>(
       "/categories",
       {
         method: "GET",
       },
-      csrfToken
+      csrfToken,
     );
   }
 
   async addCategory(
     name: string,
-    csrfToken?: string | null
+    csrfToken?: string | null,
   ): Promise<ApiResponse<BackendResponse<Category>>> {
     return this.request<BackendResponse<Category>>(
       "/categories",
@@ -76,18 +75,18 @@ class Api {
         method: "POST",
         body: JSON.stringify({ name }),
       },
-      csrfToken
+      csrfToken,
     );
   }
 
   async saveProgress(
     payload: { categoryId: string; count: number; notes?: string },
-    csrfToken?: string | null
+    csrfToken?: string | null,
   ): Promise<ApiResponse<BackendResponse<Category>>> {
     // Get the category name from the store
-    const category = (
-      await this.getCategories(csrfToken)
-    ).apiResponseData.categories?.find((cat) => cat._id === payload.categoryId);
+    const category = (await this.getCategories(csrfToken)).apiResponseData.categories?.find(
+      (cat) => cat._id === payload.categoryId,
+    );
 
     if (!category) {
       throw new Error("Category not found");
@@ -102,20 +101,20 @@ class Api {
           notes: payload.notes,
         }),
       },
-      csrfToken
+      csrfToken,
     );
   }
 
   async deleteCategory(
     categoryId: string,
-    csrfToken?: string | null
+    csrfToken?: string | null,
   ): Promise<ApiResponse<BackendResponse<void>>> {
     return this.request<BackendResponse<void>>(
       `/categories/${categoryId}`,
       {
         method: "DELETE",
       },
-      csrfToken
+      csrfToken,
     );
   }
 }

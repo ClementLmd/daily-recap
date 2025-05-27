@@ -2,6 +2,7 @@ import request from "supertest";
 import app from "../app";
 import { User } from "../models/User";
 import { Session } from "../models/Session";
+import { createHash } from "crypto";
 
 describe("Authentication", () => {
   beforeEach(async () => {
@@ -48,33 +49,49 @@ describe("Authentication", () => {
     });
 
     it("should lock account after 5 failed attempts", async () => {
+      // Create a specific user for this test
+      const lockTestUser = {
+        email: "locktest@example.com",
+        password: "password123",
+        name: "Lock Test User",
+      };
+
+      // Ensure we start with a clean state
+      await User.deleteMany({ email: lockTestUser.email });
+      const user = new User(lockTestUser);
+      await user.save();
+
+      // Make 5 failed attempts
       for (let i = 0; i < 5; i++) {
-        await request(app)
+        const response = await request(app)
           .post("/api/auth/login")
           .send({
-            email: testUser.email,
+            email: lockTestUser.email,
             password: "wrongpassword",
           })
           .set("x-device-id", "test-device")
           .set("user-agent", "test-agent");
+
+        expect(response.status).toBe(401);
+        expect(response.body.message).toBe("Invalid credentials");
       }
 
+      // Try to login with correct credentials after being locked
       const response = await request(app)
         .post("/api/auth/login")
         .send({
-          email: testUser.email,
-          password: testUser.password,
+          email: lockTestUser.email,
+          password: lockTestUser.password,
         })
         .set("x-device-id", "test-device")
         .set("user-agent", "test-agent");
 
-      expect(response.status).toBe(429);
-      expect(response.text).toContain(
-        "Too many login attempts, please try again after 15 minutes"
-      );
+      expect(response.status).toBe(401);
+      expect(response.body.message).toBe("Account is locked. Please try again later");
 
       // Verify user is locked in database
-      const lockedUser = await User.findOne({ email: testUser.email });
+      const lockedUser = await User.findOne({ email: lockTestUser.email });
+      expect(lockedUser?.failedLoginAttempts).toBe(5);
       expect(lockedUser?.isLocked).toBe(true);
     });
   });
@@ -102,8 +119,7 @@ describe("Authentication", () => {
       });
 
       sessionToken = session.token;
-      csrfToken = require("crypto")
-        .createHash("sha256")
+      csrfToken = createHash("sha256")
         .update(sessionToken + process.env.CSRF_SECRET)
         .digest("hex");
     });
@@ -130,7 +146,6 @@ describe("Authentication", () => {
 
   describe("GET /auth/check", () => {
     let sessionToken: string;
-    let csrfToken: string;
 
     beforeEach(async () => {
       const user = await User.create({
@@ -151,10 +166,6 @@ describe("Authentication", () => {
       });
 
       sessionToken = session.token;
-      csrfToken = require("crypto")
-        .createHash("sha256")
-        .update(sessionToken + process.env.CSRF_SECRET)
-        .digest("hex");
     });
 
     it("should return user data for valid session", async () => {
@@ -200,8 +211,7 @@ describe("Authentication", () => {
       });
 
       sessionToken = session.token;
-      csrfToken = require("crypto")
-        .createHash("sha256")
+      csrfToken = createHash("sha256")
         .update(sessionToken + process.env.CSRF_SECRET)
         .digest("hex");
     });
