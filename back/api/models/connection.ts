@@ -45,7 +45,6 @@ export const disconnectFromDatabase = async () => {
 // Only set up SIGTERM handler in non-test environments
 if (process.env.NODE_ENV !== "test") {
   process.on("SIGTERM", async () => {
-    console.log("Closing database connection...");
     await mongoose.disconnect();
     process.exit(0);
   });
