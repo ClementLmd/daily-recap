@@ -66,7 +66,7 @@ jobs:
       - name: Run tests
         run: |
           echo "Starting tests..."
-          pnpm test -- -- --verbose --testTimeout=30000
+          cd back && NODE_ENV=test TEST_MONGODB_URI=${{ secrets.TEST_MONGODB_URI }} pnpm test -- -- --verbose --testTimeout=30000
         env:
           DEBUG: "*"
           NODE_OPTIONS: "--max-old-space-size=4096"

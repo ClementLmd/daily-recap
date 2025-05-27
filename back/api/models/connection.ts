@@ -3,10 +3,20 @@ import mongoose from "mongoose";
 let isConnected = false;
 
 const getConnectionString = () => {
+  console.log("Environment variables:", {
+    NODE_ENV: process.env.NODE_ENV,
+    TEST_MONGODB_URI: process.env.TEST_MONGODB_URI ? "set" : "not set",
+    MONGODB_URI: process.env.MONGODB_URI ? "set" : "not set",
+  });
+
   if (process.env.NODE_ENV === "test") {
-    return process.env.TEST_MONGODB_URI || "mongodb://localhost:27017/daily-recap-test";
+    const uri = process.env.TEST_MONGODB_URI || "mongodb://localhost:27017/daily-recap-test";
+    console.log("Using test connection string:", uri);
+    return uri;
   }
-  return process.env.MONGODB_URI || "mongodb://localhost:27017/daily-recap";
+  const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/daily-recap";
+  console.log("Using connection string:", uri);
+  return uri;
 };
 
 export const connectToDatabase = async () => {
