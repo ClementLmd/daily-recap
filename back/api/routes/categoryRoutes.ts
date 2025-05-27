@@ -11,19 +11,14 @@ router.get("/", requireAuth, categoryController.getCategories);
 router.post("/", requireAuth, csrfProtection, categoryController.addCategory);
 
 // Delete a category
-router.delete(
-  "/:categoryId",
-  requireAuth,
-  csrfProtection,
-  categoryController.deleteCategory
-);
+router.delete("/:categoryId", requireAuth, csrfProtection, categoryController.deleteCategory);
 
 // Update category progress
 router.post(
   "/:categoryId/progress",
   requireAuth,
   csrfProtection,
-  categoryController.updateProgress
+  categoryController.updateProgress,
 );
 
 export default router;

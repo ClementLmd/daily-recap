@@ -6,12 +6,7 @@ import {
   revokeAllSessions,
   register,
 } from "../controllers/authController";
-import {
-  loginLimiter,
-  requireAuth,
-  csrfProtection,
-  trackDevice,
-} from "../middleware/auth";
+import { loginLimiter, requireAuth, csrfProtection, trackDevice } from "../middleware/auth";
 
 const router = Router();
 

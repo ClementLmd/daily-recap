@@ -39,7 +39,7 @@ export default function RegisterForm() {
             email: formData.email,
             password: formData.password,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -49,19 +49,14 @@ export default function RegisterForm() {
 
       router.push("/login");
     } catch (err) {
-      setValidationError(
-        err instanceof Error ? err.message : "An error occurred"
-      );
+      setValidationError(err instanceof Error ? err.message : "An error occurred");
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
           Email
         </label>
         <input
@@ -74,37 +69,27 @@ export default function RegisterForm() {
         />
       </div>
       <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
           Password
         </label>
         <input
           type="password"
           id="password"
           value={formData.password}
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           className="mt-1 block w-full px-4 py-3 text-gray-500 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm"
           required
         />
       </div>
       <div>
-        <label
-          htmlFor="confirmPassword"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
           Confirm Password
         </label>
         <input
           type="password"
           id="confirmPassword"
           value={formData.confirmPassword}
-          onChange={(e) =>
-            setFormData({ ...formData, confirmPassword: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
           className="mt-1 block w-full px-4 py-3 text-gray-500 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 sm:text-sm"
           required
         />

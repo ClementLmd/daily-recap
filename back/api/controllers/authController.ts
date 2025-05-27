@@ -41,15 +41,12 @@ export const login = async (req: Request, res: Response) => {
     // Check if account is locked
     if (user.isLocked) {
       const lockoutTime = 15 * 60 * 1000; // 15 minutes
-      const timeSinceLastAttempt =
-        Date.now() - user.lastFailedLoginAt.getTime();
+      const timeSinceLastAttempt = Date.now() - user.lastFailedLoginAt.getTime();
 
       if (timeSinceLastAttempt < lockoutTime) {
         return res.status(401).json({
           message: "Account is locked. Please try again later",
-          remainingTime: Math.ceil(
-            (lockoutTime - timeSinceLastAttempt) / 1000 / 60
-          ),
+          remainingTime: Math.ceil((lockoutTime - timeSinceLastAttempt) / 1000 / 60),
         });
       }
 
@@ -79,10 +76,7 @@ export const login = async (req: Request, res: Response) => {
     await user.save();
 
     // Invalidate existing sessions
-    await Session.updateMany(
-      { userId: user._id, isValid: true },
-      { isValid: false }
-    );
+    await Session.updateMany({ userId: user._id, isValid: true }, { isValid: false });
 
     // Create new session
     const session = new Session({
@@ -166,10 +160,7 @@ export const revokeAllSessions = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Authentication required" });
     }
 
-    await Session.updateMany(
-      { userId: req.user._id, isValid: true },
-      { isValid: false }
-    );
+    await Session.updateMany({ userId: req.user._id, isValid: true }, { isValid: false });
 
     res.clearCookie("session");
     res.json({ message: "All sessions revoked successfully" });

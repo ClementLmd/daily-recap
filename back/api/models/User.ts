@@ -27,16 +27,8 @@ export interface IUser extends Document {
   isLocked: boolean;
   comparePassword(candidatePassword: string): Promise<boolean>;
   addCategory(name: string): Promise<IUser>;
-  addProgress(
-    categoryName: string,
-    value: number,
-    notes?: string
-  ): Promise<IUser>;
-  getProgressInRange(
-    categoryName: string,
-    startDate: Date,
-    endDate: Date
-  ): ProgressEntry[];
+  addProgress(categoryName: string, value: number, notes?: string): Promise<IUser>;
+  getProgressInRange(categoryName: string, startDate: Date, endDate: Date): ProgressEntry[];
 }
 
 const progressEntrySchema = new Schema<ProgressEntry>({
@@ -106,7 +98,7 @@ const userSchema = new Schema<IUser>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Hash password before saving
@@ -122,9 +114,7 @@ userSchema.pre("save", async function (next) {
 });
 
 // Compare password method
-userSchema.methods.comparePassword = async function (
-  candidatePassword: string
-): Promise<boolean> {
+userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
   try {
     return await argon2.verify(this.password, candidatePassword);
   } catch (error) {
@@ -135,9 +125,7 @@ userSchema.methods.comparePassword = async function (
 // Add category method
 userSchema.methods.addCategory = async function (name: string): Promise<IUser> {
   // Check if category with same name exists
-  const existingCategory = this.categories.find(
-    (cat: Category) => cat.name === name
-  );
+  const existingCategory = this.categories.find((cat: Category) => cat.name === name);
   if (existingCategory) {
     throw new Error("A category with this name already exists");
   }
@@ -150,11 +138,9 @@ userSchema.methods.addCategory = async function (name: string): Promise<IUser> {
 userSchema.methods.addProgress = async function (
   categoryName: string,
   value: number,
-  notes?: string
+  notes?: string,
 ): Promise<IUser> {
-  const category = this.categories.find(
-    (cat: Category) => cat.name === categoryName
-  );
+  const category = this.categories.find((cat: Category) => cat.name === categoryName);
   if (!category) {
     throw new Error("Category not found");
   }
@@ -172,17 +158,15 @@ userSchema.methods.addProgress = async function (
 userSchema.methods.getProgressInRange = function (
   categoryName: string,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
 ): ProgressEntry[] {
-  const category = this.categories.find(
-    (cat: Category) => cat.name === categoryName
-  );
+  const category = this.categories.find((cat: Category) => cat.name === categoryName);
   if (!category) {
     throw new Error("Category not found");
   }
 
   return category.progress.filter(
-    (entry: ProgressEntry) => entry.date >= startDate && entry.date <= endDate
+    (entry: ProgressEntry) => entry.date >= startDate && entry.date <= endDate,
   );
 };
 

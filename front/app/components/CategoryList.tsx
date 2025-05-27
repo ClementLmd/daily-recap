@@ -1,19 +1,13 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
-import {
-  incrementCount,
-  decrementCount,
-  setCount,
-} from "../store/categoriesSlice";
+import { incrementCount, decrementCount, setCount } from "../store/categoriesSlice";
 import Link from "next/link";
 import { deleteCategory, fetchCategories, saveProgress } from "../store/thunks";
 
 export default function CategoryList() {
   const dispatch = useDispatch<AppDispatch>();
-  const { categories, loading, error } = useSelector(
-    (state: RootState) => state.categories
-  );
+  const { categories, loading, error } = useSelector((state: RootState) => state.categories);
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -52,13 +46,9 @@ export default function CategoryList() {
   const handleDone = async (categoryId: string) => {
     const category = categories.find((cat) => cat._id === categoryId);
     if (category && category.tempCount > 0) {
-      const notesInput = document.getElementById(
-        `notes-${categoryId}`
-      ) as HTMLInputElement;
+      const notesInput = document.getElementById(`notes-${categoryId}`) as HTMLInputElement;
       const notes = notesInput?.value || "";
-      await dispatch(
-        saveProgress({ categoryId, count: category.tempCount, notes })
-      );
+      await dispatch(saveProgress({ categoryId, count: category.tempCount, notes }));
       // Clear the notes input
       if (notesInput) {
         notesInput.value = "";
@@ -87,12 +77,8 @@ export default function CategoryList() {
               {category.name}
             </Link>
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500">
-                Total: {category.count}
-              </span>
-              <span className="text-sm text-gray-500">
-                Today: {category.tempCount}
-              </span>
+              <span className="text-sm text-gray-500">Total: {category.count}</span>
+              <span className="text-sm text-gray-500">Today: {category.tempCount}</span>
               <button
                 onClick={() => handleDelete(category._id)}
                 className="ml-2 p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
@@ -127,9 +113,7 @@ export default function CategoryList() {
                 type="number"
                 min="0"
                 value={category.tempCount}
-                onChange={(e) =>
-                  handleCountChange(category._id, parseInt(e.target.value) || 0)
-                }
+                onChange={(e) => handleCountChange(category._id, parseInt(e.target.value) || 0)}
                 className="w-20 px-3 py-2 text-center text-gray-800 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
 

@@ -63,13 +63,13 @@ const sessionSchema = new Schema<ISession>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Create indexes for better query performance
-sessionSchema.index({ userId: 1, isValid: 1 });
-sessionSchema.index({ token: 1 });
-sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// sessionSchema.index({ userId: 1, isValid: 1 });
+// sessionSchema.index({ token: 1 });
+// sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 // Generate a secure session token
 sessionSchema.statics.generateToken = function (): string {
@@ -86,7 +86,4 @@ sessionSchema.methods.extendExpiration = function (days: number = 30): void {
   this.expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 };
 
-export const Session = mongoose.model<ISession, ISessionModel>(
-  "Session",
-  sessionSchema
-);
+export const Session = mongoose.model<ISession, ISessionModel>("Session", sessionSchema);

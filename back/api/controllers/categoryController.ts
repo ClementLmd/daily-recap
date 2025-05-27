@@ -120,7 +120,7 @@ export const categoryController = {
         req.user._id.toString(),
         categoryId,
         value,
-        notes
+        notes,
       );
 
       res.json({
@@ -129,10 +129,7 @@ export const categoryController = {
       });
     } catch (error) {
       const customError = error as CustomError;
-      if (
-        customError.message ===
-        "Progress value is required and must be a non-negative number"
-      ) {
+      if (customError.message === "Progress value is required and must be a non-negative number") {
         return res.status(400).json({
           status: "error",
           message: customError.message,

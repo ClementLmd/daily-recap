@@ -1,11 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { CategoriesState } from "./types";
-import {
-  fetchCategories,
-  addCategory,
-  saveProgress,
-  deleteCategory,
-} from "./thunks";
+import { fetchCategories, addCategory, saveProgress, deleteCategory } from "./thunks";
 
 export interface Category {
   _id: string;
@@ -32,43 +27,31 @@ export const categoriesSlice = createSlice({
   initialState,
   reducers: {
     incrementCount: (state, action) => {
-      const category = state.categories.find(
-        (cat) => cat._id === action.payload
-      );
+      const category = state.categories.find((cat) => cat._id === action.payload);
       if (category) {
         category.tempCount += 1;
         // Store updated temp count in localStorage
-        const storedTempCounts = JSON.parse(
-          localStorage.getItem("tempCounts") || "{}"
-        );
+        const storedTempCounts = JSON.parse(localStorage.getItem("tempCounts") || "{}");
         storedTempCounts[category._id] = category.tempCount;
         localStorage.setItem("tempCounts", JSON.stringify(storedTempCounts));
       }
     },
     decrementCount: (state, action) => {
-      const category = state.categories.find(
-        (cat) => cat._id === action.payload
-      );
+      const category = state.categories.find((cat) => cat._id === action.payload);
       if (category) {
         category.tempCount = Math.max(0, category.tempCount - 1);
         // Store updated temp count in localStorage
-        const storedTempCounts = JSON.parse(
-          localStorage.getItem("tempCounts") || "{}"
-        );
+        const storedTempCounts = JSON.parse(localStorage.getItem("tempCounts") || "{}");
         storedTempCounts[category._id] = category.tempCount;
         localStorage.setItem("tempCounts", JSON.stringify(storedTempCounts));
       }
     },
     setCount: (state, action) => {
-      const category = state.categories.find(
-        (cat) => cat._id === action.payload.categoryId
-      );
+      const category = state.categories.find((cat) => cat._id === action.payload.categoryId);
       if (category) {
         category.tempCount = Math.max(0, action.payload.value);
         // Store updated temp count in localStorage
-        const storedTempCounts = JSON.parse(
-          localStorage.getItem("tempCounts") || "{}"
-        );
+        const storedTempCounts = JSON.parse(localStorage.getItem("tempCounts") || "{}");
         storedTempCounts[category._id] = category.tempCount;
         localStorage.setItem("tempCounts", JSON.stringify(storedTempCounts));
       }
@@ -97,9 +80,7 @@ export const categoriesSlice = createSlice({
       })
       // Save progress
       .addCase(saveProgress.fulfilled, (state, action) => {
-        const category = state.categories.find(
-          (cat) => cat._id === action.payload.categoryId
-        );
+        const category = state.categories.find((cat) => cat._id === action.payload.categoryId);
         if (category) {
           // Update with the new count from the backend
           category.count = action.payload.count;
@@ -110,22 +91,17 @@ export const categoriesSlice = createSlice({
             notes: action.payload.notes,
           });
           // Clear the temp count from localStorage
-          const storedTempCounts = JSON.parse(
-            localStorage.getItem("tempCounts") || "{}"
-          );
+          const storedTempCounts = JSON.parse(localStorage.getItem("tempCounts") || "{}");
           delete storedTempCounts[category._id];
           localStorage.setItem("tempCounts", JSON.stringify(storedTempCounts));
         }
       })
       .addCase(deleteCategory.fulfilled, (state, action) => {
-        state.categories = state.categories.filter(
-          (cat) => cat._id !== action.payload
-        );
+        state.categories = state.categories.filter((cat) => cat._id !== action.payload);
       });
   },
 });
 
-export const { incrementCount, decrementCount, setCount } =
-  categoriesSlice.actions;
+export const { incrementCount, decrementCount, setCount } = categoriesSlice.actions;
 
 export default categoriesSlice.reducer;

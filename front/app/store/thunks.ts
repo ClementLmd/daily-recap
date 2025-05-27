@@ -9,9 +9,7 @@ export const fetchCategories = createAsyncThunk(
     const state = getState() as RootState;
     const response = await api.getCategories(state.auth.csrfToken);
     // Get stored temp counts from localStorage
-    const storedTempCounts = JSON.parse(
-      localStorage.getItem("tempCounts") || "{}"
-    );
+    const storedTempCounts = JSON.parse(localStorage.getItem("tempCounts") || "{}");
 
     return (response.apiResponseData.categories || []).map((cat: Category) => ({
       _id: cat._id,
@@ -20,7 +18,7 @@ export const fetchCategories = createAsyncThunk(
       tempCount: storedTempCounts[cat._id] || 0,
       progress: cat.progress,
     }));
-  }
+  },
 );
 
 export const addCategory = createAsyncThunk(
@@ -35,7 +33,7 @@ export const addCategory = createAsyncThunk(
       };
     }
     return null;
-  }
+  },
 );
 
 export const saveProgress = createAsyncThunk(
@@ -44,12 +42,11 @@ export const saveProgress = createAsyncThunk(
     const state = getState() as RootState;
     const response = await api.saveProgress(payload, state.auth.csrfToken);
     return {
-      categoryId:
-        response.apiResponseData.updatedCategory?._id || payload.categoryId,
+      categoryId: response.apiResponseData.updatedCategory?._id || payload.categoryId,
       count: response.apiResponseData.updatedCategory?.count || 0,
       notes: payload.notes,
     };
-  }
+  },
 );
 
 export const deleteCategory = createAsyncThunk(
@@ -58,5 +55,5 @@ export const deleteCategory = createAsyncThunk(
     const state = getState() as RootState;
     await api.deleteCategory(categoryId, state.auth.csrfToken);
     return categoryId;
-  }
+  },
 );

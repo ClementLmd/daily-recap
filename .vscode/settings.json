@@ -1,0 +1,14 @@
+{
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "eslint.run": "onType",
+  "eslint.options": {
+    "overrideConfigFile": "front/.eslintrc.json"
+  },
+  "eslint.debug": true
+}

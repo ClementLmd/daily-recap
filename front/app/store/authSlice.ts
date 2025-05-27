@@ -35,7 +35,7 @@ export const login = createAsyncThunk(
         },
         credentials: "include",
         body: JSON.stringify(credentials),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -44,37 +44,34 @@ export const login = createAsyncThunk(
     }
 
     return await response.json();
-  }
+  },
 );
 
-export const logout = createAsyncThunk(
-  "auth/logout",
-  async (_, { getState }) => {
-    const state = getState() as { auth: AuthState };
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/auth/logout`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": state.auth.csrfToken || "",
-        },
-      }
-    );
+export const logout = createAsyncThunk("auth/logout", async (_, { getState }) => {
+  const state = getState() as { auth: AuthState };
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/auth/logout`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": state.auth.csrfToken || "",
+      },
+    },
+  );
 
-    if (!response.ok) {
-      throw new Error("Logout failed");
-    }
+  if (!response.ok) {
+    throw new Error("Logout failed");
   }
-);
+});
 
 export const checkSession = createAsyncThunk("auth/checkSession", async () => {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/auth/check`,
     {
       credentials: "include",
-    }
+    },
   );
 
   if (!response.ok) {

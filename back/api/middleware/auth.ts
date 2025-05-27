@@ -7,18 +7,18 @@ import { createHash } from "crypto";
 // Rate limiting middleware
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts
+  max: 6, // 6 attempts
   message: "Too many login attempts, please try again after 15 minutes",
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    // Use email + device ID as the key to track attempts per user per device
+    return `${req.body.email}-${req.headers["x-device-id"] || req.ip}`;
+  },
 });
 
 // Session validation middleware
-export const requireAuth = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const sessionToken = req.cookies.session;
 
@@ -47,8 +47,7 @@ export const requireAuth = async (
     await session.save();
 
     // Check if session needs to be extended
-    const daysUntilExpiration =
-      (session.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+    const daysUntilExpiration = (session.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24);
     if (daysUntilExpiration < 15) {
       session.extendExpiration();
       await session.save();
@@ -76,11 +75,7 @@ export const requireAuth = async (
 };
 
 // CSRF protection middleware
-export const csrfProtection = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
   const csrfToken = req.headers["x-csrf-token"];
   const sessionToken = req.cookies.session;
 
@@ -107,11 +102,7 @@ export const csrfProtection = (
 };
 
 // Device tracking middleware
-export const trackDevice = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const trackDevice = (req: Request, res: Response, next: NextFunction) => {
   const deviceId = req.headers["x-device-id"] || req.cookies.deviceId;
   const userAgent = req.headers["user-agent"] || "unknown";
   const ipAddress = req.ip || "unknown";

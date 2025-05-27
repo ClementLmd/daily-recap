@@ -55,9 +55,7 @@ export default function LoginForm() {
               className="appearance-none relative block w-full px-4 py-3 text-gray-500 bg-white border-2 border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 focus:z-10 sm:text-sm shadow-sm"
               placeholder="Email address"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
           </div>
           <div>
@@ -72,9 +70,7 @@ export default function LoginForm() {
               className="appearance-none relative block w-full px-4 py-3 text-gray-500 bg-white border-2 border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 focus:z-10 sm:text-sm shadow-sm"
               placeholder="Password"
               value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             />
           </div>
         </div>

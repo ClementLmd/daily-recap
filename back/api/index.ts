@@ -1,8 +1,7 @@
 import app from "./app";
+import { createServer } from "http";
 
-const port =
-  Number(process.env.PORT) ||
-  (process.env.NODE_ENV === "production" ? 8080 : 4000);
+const port = Number(process.env.PORT) || 5000;
 
 if (process.env.NODE_ENV === "production") {
   // Production: Listen on all interfaces
@@ -11,7 +10,7 @@ if (process.env.NODE_ENV === "production") {
   });
 } else {
   // Local development
-  const server = require("http").createServer(app);
+  const server = createServer(app);
   server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
