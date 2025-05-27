@@ -50,8 +50,22 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Debug environment
+        run: |
+          echo "NODE_ENV: $NODE_ENV"
+          echo "TEST_MONGODB_URI is set: ${{ secrets.TEST_MONGODB_URI != '' }}"
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "Back directory contents:"
+          ls -la back/
+
       - name: Run tests
-        run: pnpm test
+        run: |
+          echo "Starting tests..."
+          pnpm test -- --verbose
+        env:
+          DEBUG: "*"
 
       - name: Build
         run: pnpm build
