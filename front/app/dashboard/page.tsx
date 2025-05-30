@@ -17,9 +17,12 @@ export default function Dashboard() {
     // Check session when component mounts
     const checkAuth = async () => {
       try {
-        await dispatch(checkSession()).unwrap();
+        const result = await dispatch(checkSession()).unwrap();
+        if (!result.user) {
+          router.push("/login");
+        }
       } catch (error) {
-        // Handle session check failure silently
+        console.error("Session check failed:", error);
         router.push("/login");
       }
     };
@@ -35,7 +38,7 @@ export default function Dashboard() {
       await dispatch(logout()).unwrap();
       router.push("/");
     } catch (error) {
-      // Handle logout failure silently
+      console.error("Logout failed:", error);
       router.push("/login");
     }
   };
