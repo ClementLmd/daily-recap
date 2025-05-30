@@ -14,16 +14,20 @@ export function middleware(request: NextRequest) {
 
   // Check for authentication
   const session = request.cookies.get("session");
-  if (!session) {
-    // Redirect to login if not authenticated
-    return NextResponse.redirect(new URL("/login", request.url));
+  const csrfToken = request.cookies.get("csrf-token");
+
+  // If no session or CSRF token, redirect to login
+  if (!session || !csrfToken) {
+    const url = new URL("/login", request.url);
+    url.searchParams.set("from", pathname);
+    return NextResponse.redirect(url);
   }
 
   // For API routes, verify CSRF token
   if (pathname.startsWith("/api/")) {
-    const csrfToken = request.headers.get("x-csrf-token");
-    if (!csrfToken) {
-      return new NextResponse(JSON.stringify({ message: "CSRF token missing" }), {
+    const csrfHeader = request.headers.get("x-csrf-token");
+    if (!csrfHeader || csrfHeader !== csrfToken.value) {
+      return new NextResponse(JSON.stringify({ message: "Invalid CSRF token" }), {
         status: 403,
         headers: { "Content-Type": "application/json" },
       });

@@ -45,7 +45,7 @@ export const login = createAsyncThunk(
 
     const data = await response.json();
 
-    // Store CSRF token in a cookie
+    // Store CSRF token in a cookie with proper attributes
     document.cookie = `csrf-token=${data.csrfToken}; path=/; secure; samesite=none`;
 
     return data;
@@ -69,6 +69,10 @@ export const logout = createAsyncThunk("auth/logout", async (_, { getState }) =>
   if (!response.ok) {
     throw new Error("Logout failed");
   }
+
+  // Clear CSRF token cookie
+  document.cookie =
+    "csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=none";
 });
 
 export const checkSession = createAsyncThunk("auth/checkSession", async () => {
@@ -83,7 +87,14 @@ export const checkSession = createAsyncThunk("auth/checkSession", async () => {
     throw new Error("Session check failed");
   }
 
-  return await response.json();
+  const data = await response.json();
+
+  // Update CSRF token cookie if a new one is provided
+  if (data.csrfToken) {
+    document.cookie = `csrf-token=${data.csrfToken}; path=/; secure; samesite=none`;
+  }
+
+  return data;
 });
 
 const authSlice = createSlice({
@@ -110,6 +121,9 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Login failed";
+        state.isAuthenticated = false;
+        state.user = null;
+        state.csrfToken = null;
       })
       // Logout
       .addCase(logout.fulfilled, (state) => {
