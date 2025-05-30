@@ -13,7 +13,17 @@ const initialState: CategoriesState = {
 const loadAuthState = () => {
   if (typeof window !== "undefined") {
     const persistedState = localStorage.getItem("authState");
-    return persistedState ? JSON.parse(persistedState) : undefined;
+    if (persistedState) {
+      try {
+        const parsedState = JSON.parse(persistedState);
+        // Only restore if we have both user and csrfToken
+        if (parsedState.user && parsedState.csrfToken) {
+          return parsedState;
+        }
+      } catch (e) {
+        console.error("Failed to parse persisted auth state:", e);
+      }
+    }
   }
   return undefined;
 };
@@ -43,7 +53,12 @@ const store = makeStore();
 if (typeof window !== "undefined") {
   store.subscribe(() => {
     const state = store.getState();
-    localStorage.setItem("authState", JSON.stringify(state.auth));
+    // Only persist if we have both user and csrfToken
+    if (state.auth.user && state.auth.csrfToken) {
+      localStorage.setItem("authState", JSON.stringify(state.auth));
+    } else {
+      localStorage.removeItem("authState");
+    }
   });
 }
 
