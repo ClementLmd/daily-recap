@@ -43,7 +43,12 @@ export const login = createAsyncThunk(
       throw new Error(data.message || "Login failed");
     }
 
-    return await response.json();
+    const data = await response.json();
+
+    // Store CSRF token in a cookie
+    document.cookie = `csrf-token=${data.csrfToken}; path=/; secure; samesite=none`;
+
+    return data;
   },
 );
 

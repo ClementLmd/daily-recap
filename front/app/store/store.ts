@@ -9,6 +9,15 @@ const initialState: CategoriesState = {
   error: null,
 };
 
+// Load persisted auth state from localStorage
+const loadAuthState = () => {
+  if (typeof window !== "undefined") {
+    const persistedState = localStorage.getItem("authState");
+    return persistedState ? JSON.parse(persistedState) : undefined;
+  }
+  return undefined;
+};
+
 const makeStore = () => {
   return configureStore({
     reducer: {
@@ -17,6 +26,7 @@ const makeStore = () => {
     },
     preloadedState: {
       categories: initialState,
+      auth: loadAuthState(),
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
@@ -26,11 +36,21 @@ const makeStore = () => {
   });
 };
 
+// Create the store instance
+const store = makeStore();
+
+// Subscribe to store changes to persist auth state
+if (typeof window !== "undefined") {
+  store.subscribe(() => {
+    const state = store.getState();
+    localStorage.setItem("authState", JSON.stringify(state.auth));
+  });
+}
+
+export { store };
+
 // Infer the type of makeStore
 export type AppStore = ReturnType<typeof makeStore>;
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<AppStore["getState"]>;
 export type AppDispatch = AppStore["dispatch"];
-
-// Create the store instance
-export const store = makeStore();
