@@ -50,9 +50,6 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Debug IP
-        run: curl https://api.ipify.org
-
       - name: Run tests
         run: cd back && NODE_ENV=test TEST_MONGODB_URI=${{ secrets.TEST_MONGODB_URI }} pnpm test
 
