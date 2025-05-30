@@ -4,7 +4,7 @@ npm install -g pnpm@9.1.0
 
 # Install dependencies
 cd /opt/render/project/src/back
-pnpm install
+pnpm install --no-frozen-lockfile
 
 # Build the application
 pnpm build 
