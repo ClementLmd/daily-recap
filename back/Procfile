@@ -1,1 +1,1 @@
-web: pnpm start 
+web: cd /opt/render/project/src/back && pnpm start 
