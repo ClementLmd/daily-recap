@@ -1,0 +1,26 @@
+{
+  "buildCommand": "cd front && pnpm install && pnpm build",
+  "outputDirectory": "front/.next",
+  "framework": "nextjs",
+  "installCommand": "pnpm install",
+  "builds": [
+    {
+      "src": "front/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "back/package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "back/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "front/$1"
+    }
+  ]
+}
