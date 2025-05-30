@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "sourceMap": false,
+    "types": ["express", "node"]
+  },
+  "include": ["api/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    ".vercel",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/tests/**",
+    "jest.config.js"
+  ]
+}
