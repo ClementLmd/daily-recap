@@ -97,6 +97,7 @@ export const login = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
