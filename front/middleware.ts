@@ -18,11 +18,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // For protected routes, check authentication
-  if (!sessionCookie) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
   // For API routes, verify CSRF token
   if (pathname.startsWith("/api/")) {
     const csrfHeader = request.headers.get("x-csrf-token");
