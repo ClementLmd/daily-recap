@@ -19,7 +19,7 @@ export default function CategoryForm({ onSubmit }: CategoryFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label htmlFor="categoryName" className="block text-sm font-medium text-gray-700">
-          Category Name
+          New Category
         </label>
         <input
           type="text"
