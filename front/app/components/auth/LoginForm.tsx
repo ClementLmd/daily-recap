@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { login, clearError } from "../../store/authSlice";
@@ -8,20 +8,11 @@ import { login, clearError } from "../../store/authSlice";
 export default function LoginForm() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { loading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { loading, error } = useAppSelector((state) => state.auth);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      // Get the 'from' parameter from the URL without using useSearchParams
-      const params = new URLSearchParams(window.location.search);
-      const from = params.get("from") || "/dashboard";
-      router.push(from);
-    }
-  }, [isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +20,8 @@ export default function LoginForm() {
 
     try {
       await dispatch(login(formData)).unwrap();
-      // The redirect will be handled by the useEffect above
+      // After successful login, the middleware will handle redirection
+      router.push("/dashboard");
     } catch (err) {
       // Error is handled by the auth slice
     }

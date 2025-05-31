@@ -5,17 +5,22 @@ import type { NextRequest } from "next/server";
 const publicPaths = ["/", "/login", "/register"];
 
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get("session");
   const csrfToken = request.cookies.get("csrf-token");
-  const { pathname } = request.nextUrl;
 
-  // Check if the path is public
+  // Allow access to public paths
   if (publicPaths.includes(pathname)) {
+    // If user is already authenticated and tries to access login/register, redirect to dashboard
+    if (sessionCookie && (pathname === "/login" || pathname === "/register")) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
     return NextResponse.next();
   }
 
-  // Check for session and CSRF token
-  if (!sessionCookie || !csrfToken) {
+  // Check for session cookie
+  if (!sessionCookie) {
+    // Redirect to login with the current path as the "from" parameter
     const url = new URL("/login", request.url);
     url.searchParams.set("from", pathname);
     return NextResponse.redirect(url);
@@ -24,7 +29,7 @@ export function middleware(request: NextRequest) {
   // For API routes, verify CSRF token
   if (pathname.startsWith("/api/")) {
     const csrfHeader = request.headers.get("x-csrf-token");
-    if (!csrfHeader || csrfHeader !== csrfToken.value) {
+    if (!csrfHeader || !csrfToken || csrfHeader !== csrfToken.value) {
       return new NextResponse(
         JSON.stringify({
           status: "error",
