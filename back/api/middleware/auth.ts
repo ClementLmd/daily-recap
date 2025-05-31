@@ -116,6 +116,7 @@ export const trackDevice = (req: Request, res: Response, next: NextFunction) => 
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
       maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
     });
   }
