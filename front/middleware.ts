@@ -1,30 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Add paths that don't require authentication
-const publicPaths = ["/", "/login", "/register"];
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const sessionCookie = request.cookies.get("session");
   const csrfToken = request.cookies.get("csrf-token");
-
-  // Allow access to public paths
-  if (publicPaths.includes(pathname)) {
-    // If user is already authenticated and tries to access login/register, redirect to dashboard
-    if (sessionCookie && (pathname === "/login" || pathname === "/register")) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-    return NextResponse.next();
-  }
-
-  // Check for session cookie
-  if (!sessionCookie) {
-    // Redirect to login with the current path as the "from" parameter
-    const url = new URL("/login", request.url);
-    url.searchParams.set("from", pathname);
-    return NextResponse.redirect(url);
-  }
 
   // For API routes, verify CSRF token
   if (pathname.startsWith("/api/")) {
@@ -45,10 +24,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Add a response header to indicate the request is authenticated
-  const response = NextResponse.next();
-  response.headers.set("x-auth-status", "authenticated");
-  return response;
+  return NextResponse.next();
 }
 
 // Configure which paths the middleware should run on

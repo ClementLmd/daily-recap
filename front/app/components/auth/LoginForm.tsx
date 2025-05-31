@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { login, clearError } from "../../store/authSlice";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+
   const { loading, error } = useAppSelector((state) => state.auth);
   const [formData, setFormData] = useState({
     email: "",
@@ -20,7 +21,6 @@ export default function LoginForm() {
 
     try {
       await dispatch(login(formData)).unwrap();
-      // After successful login, the middleware will handle redirection
       router.push("/dashboard");
     } catch (err) {
       // Error is handled by the auth slice
