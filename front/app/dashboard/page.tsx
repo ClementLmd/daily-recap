@@ -3,31 +3,14 @@
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import CategoryForm from "../components/CategoryForm";
 import CategoryList from "../components/CategoryList";
-import { useEffect } from "react";
-import { addCategory } from "../store/thunks";
 import { useRouter } from "next/navigation";
-import { logout, checkSession } from "../store/authSlice";
+import { logout } from "../store/authSlice";
+import { addCategory } from "../store/thunks";
 
 export default function Dashboard() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
-
-  useEffect(() => {
-    // Check session when component mounts
-    const checkAuth = async () => {
-      try {
-        const result = await dispatch(checkSession()).unwrap();
-        if (!result.user) {
-          router.push("/login");
-        }
-      } catch (error) {
-        console.error("Session check failed:", error);
-        router.push("/login");
-      }
-    };
-    checkAuth();
-  }, [dispatch, router]);
+  const { loading } = useAppSelector((state) => state.auth);
 
   const handleAddCategory = (categoryName: string) => {
     dispatch(addCategory(categoryName));
@@ -50,11 +33,6 @@ export default function Dashboard() {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
       </div>
     );
-  }
-
-  // Don't render anything if not authenticated
-  if (!isAuthenticated) {
-    return null;
   }
 
   return (
