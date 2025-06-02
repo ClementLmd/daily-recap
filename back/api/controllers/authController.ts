@@ -122,7 +122,13 @@ export const logout = async (req: Request, res: Response) => {
       await req.session.save();
     }
 
-    res.clearCookie("session");
+    // Clear session cookie with the same options as when setting it
+    res.clearCookie("session", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
+    });
     res.json({ message: "Logged out successfully" });
   } catch (error) {
     console.error("Logout error:", error);
@@ -163,7 +169,13 @@ export const revokeAllSessions = async (req: Request, res: Response) => {
 
     await Session.updateMany({ userId: req.user._id, isValid: true }, { isValid: false });
 
-    res.clearCookie("session");
+    // Clear session cookie with the same options as when setting it
+    res.clearCookie("session", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
+    });
     res.json({ message: "All sessions revoked successfully" });
   } catch (error) {
     console.error("Revoke sessions error:", error);
