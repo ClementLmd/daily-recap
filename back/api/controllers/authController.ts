@@ -91,14 +91,12 @@ export const login = async (req: Request, res: Response) => {
     const csrfToken = createHash("sha256")
       .update(session.token + process.env.CSRF_SECRET)
       .digest("hex");
-
     // Set session cookie
     res.cookie("session", session.token, {
       httpOnly: true,
-      secure: true, // Always use secure in production
-      sameSite: "none", // Allow cross-site requests
-      domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
-      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
@@ -128,11 +126,8 @@ export const logout = async (req: Request, res: Response) => {
     // Clear session cookie with the same options as when setting it
     res.clearCookie("session", {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
-      path: "/",
-      expires: new Date(0),
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
     res.json({ message: "Logged out successfully" });
@@ -178,11 +173,8 @@ export const revokeAllSessions = async (req: Request, res: Response) => {
     // Clear session cookie with the same options as when setting it
     res.clearCookie("session", {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
-      path: "/",
-      expires: new Date(0),
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
     res.json({ message: "All sessions revoked successfully" });
   } catch (error) {

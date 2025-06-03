@@ -5,7 +5,6 @@ const COOKIE_OPTIONS = {
   expires: new Date(0),
   secure: process.env.NODE_ENV === "production",
   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-  domain: process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_COOKIE_DOMAIN : undefined,
 };
 
 export const clearAuthState = () => {
