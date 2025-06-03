@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { login, clearError } from "../../store/authSlice";
+import { login } from "../../store/auth.thunks";
+import { clearError } from "../../store/authSlice";
 
 export default function LoginForm() {
   const router = useRouter();

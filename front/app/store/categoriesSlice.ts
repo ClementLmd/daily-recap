@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { CategoriesState } from "./types";
-import { fetchCategories, addCategory, saveProgress, deleteCategory } from "./thunks";
+import { fetchCategories, addCategory, saveProgress, deleteCategory } from "./categories.thunks";
 
 export interface Category {
   _id: string;
