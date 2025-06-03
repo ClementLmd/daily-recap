@@ -22,6 +22,17 @@ const initialState: AuthState = {
   error: null,
 };
 
+// Helper function to clear auth state
+const clearAuthState = () => {
+  // Clear CSRF token cookie
+  document.cookie =
+    "csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=none";
+  // Clear session cookie
+  document.cookie =
+    "session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=none";
+  return initialState;
+};
+
 // Async thunks
 export const login = createAsyncThunk(
   "auth/login",
@@ -70,32 +81,40 @@ export const logout = createAsyncThunk("auth/logout", async (_, { getState }) =>
     throw new Error("Logout failed");
   }
 
-  // Clear CSRF token cookie
-  document.cookie =
-    "csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=none";
+  // Clear all auth-related cookies
+  clearAuthState();
 });
 
-export const checkSession = createAsyncThunk("auth/checkSession", async () => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/auth/check`,
-    {
-      credentials: "include",
-    },
-  );
+export const checkSession = createAsyncThunk(
+  "auth/checkSession",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/auth/check`,
+        {
+          credentials: "include",
+        },
+      );
 
-  if (!response.ok) {
-    throw new Error("Session check failed");
-  }
+      if (!response.ok) {
+        // If session is invalid, clear auth state
+        clearAuthState();
+        throw new Error("Session check failed");
+      }
 
-  const data = await response.json();
+      const data = await response.json();
 
-  // Update CSRF token cookie if a new one is provided
-  if (data.csrfToken) {
-    document.cookie = `csrf-token=${data.csrfToken}; path=/; secure; samesite=none`;
-  }
+      // Update CSRF token cookie if a new one is provided
+      if (data.csrfToken) {
+        document.cookie = `csrf-token=${data.csrfToken}; path=/; secure; samesite=none`;
+      }
 
-  return data;
-});
+      return data;
+    } catch (error) {
+      return rejectWithValue("Session check failed");
+    }
+  },
+);
 
 const authSlice = createSlice({
   name: "auth",
@@ -127,9 +146,11 @@ const authSlice = createSlice({
       })
       // Logout
       .addCase(logout.fulfilled, (state) => {
-        state.user = null;
-        state.csrfToken = null;
-        state.isAuthenticated = false;
+        return clearAuthState();
+      })
+      .addCase(logout.rejected, (state) => {
+        // Even if logout fails, clear the state
+        return clearAuthState();
       })
       // Check Session
       .addCase(checkSession.pending, (state) => {
@@ -142,10 +163,7 @@ const authSlice = createSlice({
         state.csrfToken = action.payload.csrfToken;
       })
       .addCase(checkSession.rejected, (state) => {
-        state.loading = false;
-        state.isAuthenticated = false;
-        state.user = null;
-        state.csrfToken = null;
+        return clearAuthState();
       });
   },
 });
