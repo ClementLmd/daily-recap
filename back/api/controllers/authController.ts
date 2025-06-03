@@ -117,9 +117,11 @@ export const login = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   try {
-    if (req.session) {
-      req.session.isValid = false;
-      await req.session.save();
+    const sessionToken = req.cookies.session;
+
+    if (sessionToken) {
+      // Invalidate the current session
+      await Session.findOneAndUpdate({ token: sessionToken }, { isValid: false });
     }
 
     // Clear session cookie with the same options as when setting it
@@ -128,7 +130,10 @@ export const logout = async (req: Request, res: Response) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
+      path: "/", // Add path to ensure cookie is cleared from all paths
+      expires: new Date(0), // Set expiration to past date
     });
+
     res.json({ message: "Logged out successfully" });
   } catch (error) {
     console.error("Logout error:", error);
