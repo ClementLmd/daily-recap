@@ -11,7 +11,14 @@ const initialState: CategoriesState = {
 
 // Load persisted states from localStorage
 const loadPersistedState = () => {
-  if (typeof window !== "undefined") {
+  if (typeof window === "undefined") {
+    return {
+      auth: undefined,
+      categories: initialState,
+    };
+  }
+
+  try {
     const persistedAuth = localStorage.getItem("authState");
     const persistedCategories = localStorage.getItem("categoriesState");
 
@@ -27,11 +34,13 @@ const loadPersistedState = () => {
       auth: authState,
       categories: categoriesState || initialState,
     };
+  } catch (error) {
+    console.error("Error loading persisted state:", error);
+    return {
+      auth: undefined,
+      categories: initialState,
+    };
   }
-  return {
-    auth: undefined,
-    categories: initialState,
-  };
 };
 
 const makeStore = () => {
@@ -56,17 +65,21 @@ const store = makeStore();
 // Subscribe to store changes to persist states
 if (typeof window !== "undefined") {
   store.subscribe(() => {
-    const state = store.getState();
+    try {
+      const state = store.getState();
 
-    // Persist auth state
-    if (state.auth.user && state.auth.csrfToken) {
-      localStorage.setItem("authState", JSON.stringify(state.auth));
-      // Only persist categories when user is authenticated
-      localStorage.setItem("categoriesState", JSON.stringify(state.categories));
-    } else {
-      // Clear both auth and categories when user is not authenticated
-      localStorage.removeItem("authState");
-      localStorage.removeItem("categoriesState");
+      // Persist auth state
+      if (state.auth.user && state.auth.csrfToken) {
+        localStorage.setItem("authState", JSON.stringify(state.auth));
+        // Only persist categories when user is authenticated
+        localStorage.setItem("categoriesState", JSON.stringify(state.categories));
+      } else {
+        // Clear both auth and categories when user is not authenticated
+        localStorage.removeItem("authState");
+        localStorage.removeItem("categoriesState");
+      }
+    } catch (error) {
+      console.error("Error persisting state:", error);
     }
   });
 }
@@ -74,7 +87,7 @@ if (typeof window !== "undefined") {
 export { store };
 
 // Infer the type of makeStore
-export type AppStore = ReturnType<typeof makeStore>;
+export type AppStore = typeof store;
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<AppStore["getState"]>;
 export type AppDispatch = AppStore["dispatch"];
