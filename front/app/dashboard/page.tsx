@@ -1,8 +1,8 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import CategoryForm from "../components/CategoryForm";
-import CategoryList from "../components/CategoryList";
+import CategoryForm from "../components/categories/CategoryForm";
+import CategoryList from "../components/categories/CategoryList";
 import { useRouter } from "next/navigation";
 import { logout } from "../store/auth.thunks";
 import { addCategory } from "../store/categories.thunks";

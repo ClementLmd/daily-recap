@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../store/store";
-import { incrementCount, decrementCount, setCount } from "../store/categoriesSlice";
+import { AppDispatch, RootState } from "../../store/store";
+import { incrementCount, decrementCount, setCount } from "../../store/categoriesSlice";
 import Link from "next/link";
-import { deleteCategory, fetchCategories, saveProgress } from "../store/categories.thunks";
+import { deleteCategory, fetchCategories, saveProgress } from "../../store/categories.thunks";
 
 export default function CategoryList() {
   const dispatch = useDispatch<AppDispatch>();
