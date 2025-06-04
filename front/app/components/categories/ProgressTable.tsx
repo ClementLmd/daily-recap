@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ProgressEntry } from "../store/types";
+import { ProgressEntry } from "../../store/types";
 
 interface ProgressTableProps {
   progress: ProgressEntry[];

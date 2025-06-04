@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { ProgressEntry } from "../store/types";
+import { ProgressEntry } from "../../store/types";
 
 ChartJS.register(
   CategoryScale,

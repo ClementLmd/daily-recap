@@ -1,17 +1,25 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import ProgressTable from "../../components/ProgressTable";
-import ProgressGraph from "../../components/ProgressGraph";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../store/store";
+import { fetchCategories } from "../../store/categories.thunks";
+import ProgressTable from "../../components/categories/ProgressTable";
+import ProgressGraph from "../../components/categories/ProgressGraph";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import CategoryStats from "../../components/categories/CategoryStats";
 
 export default function CategoryPage() {
   const params = useParams();
+  const dispatch = useDispatch<AppDispatch>();
   const categoryName = decodeURIComponent(params.name as string);
   const [viewMode, setViewMode] = useState<"table" | "graph">("table");
+
+  // Fetch latest data when page loads
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
   const category = useSelector((state: RootState) =>
     state.categories.categories.find((cat) => cat.name === categoryName),
@@ -43,56 +51,47 @@ export default function CategoryPage() {
           </Link>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">Total Count</h2>
-              <p className="text-3xl font-bold text-blue-600">{category.count}</p>
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">Today&apos;s Count</h2>
-              <p className="text-3xl font-bold text-green-600">{category.tempCount}</p>
-            </div>
-          </div>
-        </div>
+        <div className="space-y-6">
+          <CategoryStats totalCount={category.count} progress={category.progress} />
 
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <div className="mb-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Progress History</h2>
-                <p className="text-sm text-gray-500">Total entries: {category.progress.length}</p>
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setViewMode("table")}
-                  className={`px-4 py-2 rounded-md ${
-                    viewMode === "table"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  Table
-                </button>
-                <button
-                  onClick={() => setViewMode("graph")}
-                  className={`px-4 py-2 rounded-md ${
-                    viewMode === "graph"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  Graph
-                </button>
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Progress History</h2>
+                  <p className="text-sm text-gray-500">Total entries: {category.progress.length}</p>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setViewMode("table")}
+                    className={`px-4 py-2 rounded-md ${
+                      viewMode === "table"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Table
+                  </button>
+                  <button
+                    onClick={() => setViewMode("graph")}
+                    className={`px-4 py-2 rounded-md ${
+                      viewMode === "graph"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    Graph
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
-          {viewMode === "table" ? (
-            <ProgressTable progress={category.progress} />
-          ) : (
-            <ProgressGraph progress={category.progress} />
-          )}
+            {viewMode === "table" ? (
+              <ProgressTable progress={category.progress} />
+            ) : (
+              <ProgressGraph progress={category.progress} />
+            )}
+          </div>
         </div>
       </div>
     </div>
