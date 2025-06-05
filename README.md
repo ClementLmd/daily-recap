@@ -6,7 +6,8 @@
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-000000?style=flat&logo=express&logoColor=white)](https://expressjs.com/)
 
-A full-stack application built with Next.js, Node.js, and TypeScript, using a modern monorepo structure with Turborepo.
+Daily Recap is a productivity tool that allows users to log and review daily activities.  
+It emphasizes speed, simplicity, and full control over your own data.
 
 ## 🌐 Live Demo
 
@@ -46,7 +47,7 @@ Check out the live application: [Daily Recap](https://daily-recap-front.vercel.a
 1. Clone the repository:
 
 ```bash
-git clone [your-repository-url]
+git clone https://github.com/ClementLmd/daily-recap.git
 cd daily-recap
 ```
 
