@@ -25,8 +25,14 @@ export default function AuthCheck({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+        <div className="text-center text-gray-600">
+          <p>Checking your session...</p>
+          <p className="text-sm mt-2">
+            Our backend is hosted on a free tier, so it may take up to 30 seconds to wake up.
+          </p>
+        </div>
       </div>
     );
   }
