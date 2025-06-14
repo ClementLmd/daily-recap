@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { ProgressEntry } from "../../store/types";
+import { useAppDispatch } from "../../store/hooks";
+import { deleteProgress } from "../../store/categories.thunks";
 
 interface ProgressTableProps {
   progress: ProgressEntry[];
+  categoryName: string;
 }
 
-export default function ProgressTable({ progress }: ProgressTableProps) {
+export default function ProgressTable({ progress, categoryName }: ProgressTableProps) {
+  const dispatch = useAppDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(progress.length / itemsPerPage);
@@ -20,6 +24,15 @@ export default function ProgressTable({ progress }: ProgressTableProps) {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
+
+  const handleDelete = async (displayIndex: number) => {
+    // Calculate the actual index in the sorted array
+    const actualIndex = (currentPage - 1) * itemsPerPage + displayIndex;
+
+    if (window.confirm("Are you sure you want to delete this progress entry?")) {
+      await dispatch(deleteProgress({ categoryName, progressIndex: actualIndex }));
+    }
+  };
 
   if (progress.length === 0) {
     return (
@@ -44,16 +57,28 @@ export default function ProgressTable({ progress }: ProgressTableProps) {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Notes
               </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {currentItems.map((entry, index) => (
-              <tr key={index}>
+            {currentItems.map((entry, displayIndex) => (
+              <tr key={displayIndex}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {new Date(entry.date).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.value}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">{entry.notes || "-"}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button
+                    onClick={() => handleDelete(displayIndex)}
+                    className="text-red-600 hover:text-red-900"
+                    title="Delete entry"
+                  >
+                    ×
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

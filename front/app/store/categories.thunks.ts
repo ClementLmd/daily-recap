@@ -57,3 +57,16 @@ export const deleteCategory = createAsyncThunk(
     return categoryId;
   },
 );
+
+export const deleteProgress = createAsyncThunk(
+  "categories/deleteProgress",
+  async (payload: { categoryName: string; progressIndex: number }, { getState }) => {
+    const state = getState() as RootState;
+    const response = await api.deleteProgress(
+      payload.categoryName,
+      payload.progressIndex,
+      state.auth.csrfToken,
+    );
+    return response.apiResponseData.updatedCategory;
+  },
+);

@@ -15,15 +15,32 @@ export const deleteProgress = async (
     throw new Error("Category not found");
   }
 
-  if (progressIndex < 0 || progressIndex >= category.progress.length) {
+  // Sort progress by date, most recent first (same as frontend)
+  const sortedProgress = [...category.progress].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+
+  if (progressIndex < 0 || progressIndex >= sortedProgress.length) {
+    throw new Error("Progress entry not found");
+  }
+
+  // Get the entry to delete from the sorted array
+  const entryToDelete = sortedProgress[progressIndex];
+
+  // Find the actual index in the original array
+  const actualIndex = category.progress.findIndex(
+    (entry) => entry.date === entryToDelete.date && entry.value === entryToDelete.value,
+  );
+
+  if (actualIndex === -1) {
     throw new Error("Progress entry not found");
   }
 
   // Subtract the value from the total count
-  category.count -= category.progress[progressIndex].value;
+  category.count -= category.progress[actualIndex].value;
 
   // Remove the progress entry
-  category.progress.splice(progressIndex, 1);
+  category.progress.splice(actualIndex, 1);
 
   await user.save();
 

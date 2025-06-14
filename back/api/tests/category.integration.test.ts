@@ -303,6 +303,25 @@ describe("Category Integration Tests", () => {
     });
 
     it("should delete a progress entry", async () => {
+      // First verify the initial state
+      const initialResponse = await request(app)
+        .get("/api/categories")
+        .set("Cookie", [`session=${sessionToken}`])
+        .set("x-csrf-token", csrfToken)
+        .expect(200);
+
+      const initialCategory = initialResponse.body.categories.find(
+        (cat: { name: string }) => cat.name === categoryName,
+      );
+      expect(initialCategory.progress).toHaveLength(2);
+
+      // Find the entry with value 20 (the one we want to delete)
+      const entryToDelete = initialCategory.progress.find(
+        (entry: { value: number }) => entry.value === 20,
+      );
+      expect(entryToDelete).toBeDefined();
+
+      // Delete the entry with value 20
       const response = await request(app)
         .delete(`/api/categories/${categoryName}/progress`)
         .send({ progressIndex: 0 })
@@ -313,9 +332,12 @@ describe("Category Integration Tests", () => {
       expect(response.body.status).toBe("success");
       expect(response.body.updatedCategory.name).toBe(categoryName);
       expect(response.body.updatedCategory.progress).toHaveLength(1);
-      expect(response.body.updatedCategory.progress[0].value).toBe(20);
-      expect(response.body.updatedCategory.progress[0].notes).toBe("Second entry");
-      expect(response.body.updatedCategory.count).toBe(20); // Total count should be updated
+
+      // Verify the remaining entry is the one with value 10
+      const remainingEntry = response.body.updatedCategory.progress[0];
+      expect(remainingEntry.value).toBe(10);
+      expect(remainingEntry.notes).toBe("First entry");
+      expect(response.body.updatedCategory.count).toBe(10); // Total count should be updated
     });
 
     it("should return 404 if category is not found", async () => {
