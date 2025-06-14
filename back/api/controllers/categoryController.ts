@@ -3,6 +3,7 @@ import { getCategories } from "../useCases/category/getCategories";
 import { addCategory } from "../useCases/category/addCategory";
 import { deleteCategory } from "../useCases/category/deleteCategory";
 import { updateProgress } from "../useCases/category/updateProgress";
+import { deleteProgress } from "../useCases/category/deleteProgress";
 import { IUser } from "../models/User";
 
 interface CustomError extends Error {
@@ -144,6 +145,56 @@ export const categoryController = {
       res.status(500).json({
         status: "error",
         message: "Failed to update progress",
+      });
+    }
+  },
+
+  // Delete progress entry
+  deleteProgress: async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      if (!req.user?._id) {
+        return res.status(401).json({
+          status: "error",
+          message: "User not authenticated",
+        });
+      }
+      const { categoryName } = req.params as { categoryName: string };
+      const { progressIndex } = req.body as { progressIndex: number };
+
+      if (typeof progressIndex !== "number") {
+        return res.status(400).json({
+          status: "error",
+          message: "Progress index is required",
+        });
+      }
+
+      const updatedCategory = await deleteProgress(
+        req.user._id.toString(),
+        categoryName,
+        progressIndex,
+      );
+
+      res.json({
+        status: "success",
+        updatedCategory,
+      });
+    } catch (error) {
+      const customError = error as CustomError;
+      if (customError.message === "Progress entry not found") {
+        return res.status(404).json({
+          status: "error",
+          message: customError.message,
+        });
+      }
+      if (customError.message === "Category not found") {
+        return res.status(404).json({
+          status: "error",
+          message: customError.message,
+        });
+      }
+      res.status(500).json({
+        status: "error",
+        message: "Failed to delete progress entry",
       });
     }
   },

@@ -117,6 +117,21 @@ class Api {
       csrfToken,
     );
   }
+
+  async deleteProgress(
+    categoryName: string,
+    progressIndex: number,
+    csrfToken?: string | null,
+  ): Promise<ApiResponse<BackendResponse<Category>>> {
+    return this.request<BackendResponse<Category>>(
+      `/categories/${encodeURIComponent(categoryName)}/progress`,
+      {
+        method: "DELETE",
+        body: JSON.stringify({ progressIndex }),
+      },
+      csrfToken,
+    );
+  }
 }
 
 export const api = new Api();

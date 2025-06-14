@@ -87,7 +87,7 @@ export default function CategoryPage() {
             </div>
 
             {viewMode === "table" ? (
-              <ProgressTable progress={category.progress} />
+              <ProgressTable progress={category.progress} categoryName={category.name} />
             ) : (
               <ProgressGraph progress={category.progress} />
             )}

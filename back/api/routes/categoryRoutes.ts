@@ -21,4 +21,12 @@ router.post(
   categoryController.updateProgress,
 );
 
+// Delete progress entry
+router.delete(
+  "/:categoryName/progress",
+  requireAuth,
+  csrfProtection,
+  categoryController.deleteProgress,
+);
+
 export default router;
