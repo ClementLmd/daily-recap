@@ -273,4 +273,95 @@ describe("Category Integration Tests", () => {
       expect(response.body.message).toBe("Authentication required");
     });
   });
+
+  describe("DELETE /api/categories/:categoryName/progress", () => {
+    const categoryName = "Test Category";
+
+    beforeEach(async () => {
+      // Create a test category
+      await request(app)
+        .post("/api/categories")
+        .send({ name: categoryName })
+        .set("Cookie", [`session=${sessionToken}`])
+        .set("x-csrf-token", csrfToken)
+        .expect(201);
+
+      // Add some progress entries
+      await request(app)
+        .post(`/api/categories/${categoryName}/progress`)
+        .send({ value: 10, notes: "First entry" })
+        .set("Cookie", [`session=${sessionToken}`])
+        .set("x-csrf-token", csrfToken)
+        .expect(200);
+
+      await request(app)
+        .post(`/api/categories/${categoryName}/progress`)
+        .send({ value: 20, notes: "Second entry" })
+        .set("Cookie", [`session=${sessionToken}`])
+        .set("x-csrf-token", csrfToken)
+        .expect(200);
+    });
+
+    it("should delete a progress entry", async () => {
+      const response = await request(app)
+        .delete(`/api/categories/${categoryName}/progress`)
+        .send({ progressIndex: 0 })
+        .set("Cookie", [`session=${sessionToken}`])
+        .set("x-csrf-token", csrfToken)
+        .expect(200);
+
+      expect(response.body.status).toBe("success");
+      expect(response.body.updatedCategory.name).toBe(categoryName);
+      expect(response.body.updatedCategory.progress).toHaveLength(1);
+      expect(response.body.updatedCategory.progress[0].value).toBe(20);
+      expect(response.body.updatedCategory.progress[0].notes).toBe("Second entry");
+      expect(response.body.updatedCategory.count).toBe(20); // Total count should be updated
+    });
+
+    it("should return 404 if category is not found", async () => {
+      const response = await request(app)
+        .delete("/api/categories/nonexistent/progress")
+        .send({ progressIndex: 0 })
+        .set("Cookie", [`session=${sessionToken}`])
+        .set("x-csrf-token", csrfToken)
+        .expect(404);
+
+      expect(response.body.status).toBe("error");
+      expect(response.body.message).toBe("Category not found");
+    });
+
+    it("should return 404 if progress entry is not found", async () => {
+      const response = await request(app)
+        .delete(`/api/categories/${categoryName}/progress`)
+        .send({ progressIndex: 5 }) // Non-existent index
+        .set("Cookie", [`session=${sessionToken}`])
+        .set("x-csrf-token", csrfToken)
+        .expect(404);
+
+      expect(response.body.status).toBe("error");
+      expect(response.body.message).toBe("Progress entry not found");
+    });
+
+    it("should return 401 if not authenticated", async () => {
+      const response = await request(app)
+        .delete(`/api/categories/${categoryName}/progress`)
+        .send({ progressIndex: 0 })
+        .expect(401);
+
+      expect(response.body.status).toBe("error");
+      expect(response.body.message).toBe("Authentication required");
+    });
+
+    it("should return 400 if progressIndex is missing", async () => {
+      const response = await request(app)
+        .delete(`/api/categories/${categoryName}/progress`)
+        .send({})
+        .set("Cookie", [`session=${sessionToken}`])
+        .set("x-csrf-token", csrfToken)
+        .expect(400);
+
+      expect(response.body.status).toBe("error");
+      expect(response.body.message).toBe("Progress index is required");
+    });
+  });
 });
