@@ -119,12 +119,12 @@ class Api {
   }
 
   async deleteProgress(
-    activityName: string,
+    activityId: string,
     progressIndex: number,
     csrfToken?: string | null,
   ): Promise<ApiResponse<BackendResponse<Activity>>> {
     return this.request<BackendResponse<Activity>>(
-      `/activities/${encodeURIComponent(activityName)}/progress`,
+      `/activities/${encodeURIComponent(activityId)}/progress`,
       {
         method: "DELETE",
         body: JSON.stringify({ progressIndex }),

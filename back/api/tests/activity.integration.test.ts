@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import { Session } from "../models/Session";
 import { createHash } from "crypto";
 
-describe("Category Integration Tests", () => {
+describe("Activity Integration Tests", () => {
   let testUser: IUser & { _id: mongoose.Types.ObjectId };
   let sessionToken: string;
   let csrfToken: string;
@@ -36,29 +36,29 @@ describe("Category Integration Tests", () => {
       .digest("hex");
   });
 
-  describe("POST /api/categories", () => {
-    it("should create a new category", async () => {
-      const categoryData = {
-        name: "Test Category",
+  describe("POST /api/activities", () => {
+    it("should create a new activity", async () => {
+      const activityData = {
+        name: "Test Activity",
       };
 
       const response = await request(app)
-        .post("/api/categories")
-        .send(categoryData)
+        .post("/api/activities")
+        .send(activityData)
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(201);
 
       expect(response.body.status).toBe("success");
-      expect(response.body.newCategory.name).toBe(categoryData.name);
+      expect(response.body.newActivity.name).toBe(activityData.name);
     });
 
     it("should return 401 if not authenticated", async () => {
-      const categoryData = {
-        name: "Test Category",
+      const activityData = {
+        name: "Test Activity",
       };
 
-      const response = await request(app).post("/api/categories").send(categoryData).expect(401);
+      const response = await request(app).post("/api/activities").send(activityData).expect(401);
 
       expect(response.body.status).toBe("error");
       expect(response.body.message).toBe("Authentication required");
@@ -66,134 +66,158 @@ describe("Category Integration Tests", () => {
 
     it("should return 400 if name is missing", async () => {
       const response = await request(app)
-        .post("/api/categories")
+        .post("/api/activities")
         .send({})
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(400);
 
       expect(response.body.status).toBe("error");
-      expect(response.body.message).toBe("Category name is required");
+      expect(response.body.message).toBe("Activity name is required");
     });
 
-    it("should return 409 if category name already exists", async () => {
-      // First create a category
-      const categoryData = {
-        name: "Duplicate Category",
+    it("should return 409 if activity name already exists", async () => {
+      // First create a activity
+      const activityData = {
+        name: "Duplicate Activity",
       };
 
       await request(app)
-        .post("/api/categories")
-        .send(categoryData)
+        .post("/api/activities")
+        .send(activityData)
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(201);
 
-      // Try to create the same category again
+      // Try to create the same activity again
       const response = await request(app)
-        .post("/api/categories")
-        .send(categoryData)
+        .post("/api/activities")
+        .send(activityData)
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(409);
 
       expect(response.body.status).toBe("error");
-      expect(response.body.message).toBe("A category with this name already exists");
+      expect(response.body.message).toBe("An activity with this name already exists");
     });
 
-    it("should trim whitespace from category name", async () => {
-      const categoryData = {
-        name: "  Trimmed Category  ",
+    it("should trim whitespace from activity name", async () => {
+      const activityData = {
+        name: "  Trimmed Activity  ",
       };
 
       const response = await request(app)
-        .post("/api/categories")
-        .send(categoryData)
+        .post("/api/activities")
+        .send(activityData)
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(201);
 
-      expect(response.body.newCategory.name).toBe("Trimmed Category");
+      expect(response.body.newActivity.name).toBe("Trimmed Activity");
     });
   });
 
-  describe("DELETE /api/categories/:categoryId", () => {
-    it("should delete an existing category", async () => {
-      // Create a test category
-      const categoryName = "Test Category";
+  describe("DELETE /api/activities/:activityId", () => {
+    it("should delete an existing activity", async () => {
+      // Create a test activity
+      const activityName = "Test Activity";
       const createResponse = await request(app)
-        .post("/api/categories")
-        .send({ name: categoryName })
+        .post("/api/activities")
+        .send({ name: activityName })
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(201);
 
-      const categoryId = createResponse.body.newCategory._id;
+      const activityId = createResponse.body.newActivity._id;
 
-      // Delete the category
+      // Delete the activity
       const response = await request(app)
-        .delete(`/api/categories/${categoryId}`)
+        .delete(`/api/activities/${activityId}`)
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(200);
 
       expect(response.body.status).toBe("success");
-      expect(response.body.message).toBe("Category deleted successfully");
+      expect(response.body.message).toBe("Activity deleted successfully");
 
-      // Verify the category is deleted
+      // Verify the activity is deleted
       const user = await User.findById(testUser._id);
-      expect(user?.categories.find((cat) => cat._id.toString() === categoryId)).toBeUndefined();
+      expect(user?.activities.find((cat) => cat._id.toString() === activityId)).toBeUndefined();
     });
 
-    it("should return 404 if category is not found", async () => {
+    it("should return 404 if activity is not found", async () => {
       const response = await request(app)
-        .delete("/api/categories/507f1f77bcf86cd799439011") // A non-existent MongoDB ID
+        .delete("/api/activities/507f1f77bcf86cd799439011") // A non-existent MongoDB ID
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(404);
 
       expect(response.body.status).toBe("error");
-      expect(response.body.message).toBe("Category not found");
+      expect(response.body.message).toBe("Activity not found");
     });
   });
 
-  describe("POST /api/categories/:categoryId/progress", () => {
-    const categoryName = "Test Category";
+  describe("POST /api/activities/:activityId/progress", () => {
+    const activityName = "Test Activity";
 
     beforeEach(async () => {
-      // Create a test category
+      // Create a test activity
       await request(app)
-        .post("/api/categories")
-        .send({ name: categoryName })
+        .post("/api/activities")
+        .send({ name: activityName })
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(201);
     });
 
-    it("should add progress to a category", async () => {
+    it("should add progress to a activity", async () => {
       const progressData = {
         value: 30,
         notes: "Read chapter 5",
       };
 
+      // First get the activity ID
+      const activityResponse = await request(app)
+        .get("/api/activities")
+        .set("Cookie", [`session=${sessionToken}`])
+        .set("x-csrf-token", csrfToken)
+        .expect(200);
+
+      const activity = activityResponse.body.activities.find(
+        (act: { name: string }) => act.name === activityName,
+      );
+      expect(activity).toBeDefined();
+
       const response = await request(app)
-        .post(`/api/categories/${categoryName}/progress`)
+        .post(`/api/activities/${activity._id}/progress`)
         .send(progressData)
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(200);
 
       expect(response.body.status).toBe("success");
-      expect(response.body.updatedCategory.name).toBe(categoryName);
-      expect(response.body.updatedCategory.progress).toHaveLength(1);
-      expect(response.body.updatedCategory.progress[0].value).toBe(progressData.value);
-      expect(response.body.updatedCategory.progress[0].notes).toBe(progressData.notes);
-      expect(response.body.updatedCategory.progress[0].date).toBeDefined();
+      expect(response.body.updatedActivity.name).toBe(activityName);
+      expect(response.body.updatedActivity.progress).toHaveLength(1);
+      expect(response.body.updatedActivity.progress[0].value).toBe(progressData.value);
+      expect(response.body.updatedActivity.progress[0].notes).toBe(progressData.notes);
+      expect(response.body.updatedActivity.progress[0].date).toBeDefined();
     });
 
     it("should return 400 if value is missing", async () => {
+      // First get the activity ID
+      const activityResponse = await request(app)
+        .get("/api/activities")
+        .set("Cookie", [`session=${sessionToken}`])
+        .set("x-csrf-token", csrfToken)
+        .expect(200);
+
+      const activity = activityResponse.body.activities.find(
+        (act: { name: string }) => act.name === activityName,
+      );
+      expect(activity).toBeDefined();
+
       const response = await request(app)
-        .post(`/api/categories/${categoryName}/progress`)
+        .post(`/api/activities/${activity._id}/progress`)
         .send({ notes: "Some notes" })
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
@@ -205,61 +229,72 @@ describe("Category Integration Tests", () => {
       );
     });
 
-    it("should return 404 if category is not found", async () => {
+    it("should return 404 if activity is not found", async () => {
       const response = await request(app)
-        .post("/api/categories/nonexistent/progress")
+        .post("/api/activities/000000000000000000000000/progress")
         .send({ value: 30 })
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(404);
 
       expect(response.body.status).toBe("error");
-      expect(response.body.message).toBe("Category not found");
+      expect(response.body.message).toBe("Activity not found");
     });
   });
 
-  describe("GET /api/categories", () => {
-    it("should return all categories for the user", async () => {
-      // Create multiple categories
-      const categories = ["Category 1", "Category 2", "Category 3"];
-      for (const name of categories) {
+  describe("GET /api/activities", () => {
+    it("should return all activities for the user", async () => {
+      // Create multiple activities
+      const activities = ["Activity 1", "Activity 2", "Activity 3"];
+      for (const name of activities) {
         await request(app)
-          .post("/api/categories")
+          .post("/api/activities")
           .send({ name })
           .set("Cookie", [`session=${sessionToken}`])
           .set("x-csrf-token", csrfToken)
           .expect(201);
       }
 
-      // Add some progress to one category
+      // Add some progress to one activity
+      const activityResponse = await request(app)
+        .get("/api/activities")
+        .set("Cookie", [`session=${sessionToken}`])
+        .set("x-csrf-token", csrfToken)
+        .expect(200);
+
+      const activity = activityResponse.body.activities.find(
+        (act: { name: string }) => act.name === "Activity 1",
+      );
+      expect(activity).toBeDefined();
+
       await request(app)
-        .post("/api/categories/Category 1/progress")
+        .post(`/api/activities/${activity._id}/progress`)
         .send({ value: 10 })
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(200);
 
       const response = await request(app)
-        .get("/api/categories")
+        .get("/api/activities")
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(200);
 
       expect(response.body.status).toBe("success");
-      expect(response.body.categories).toHaveLength(3);
+      expect(response.body.activities).toHaveLength(3);
 
-      // Verify category with progress
-      const categoryWithProgress = response.body.categories.find(
-        (cat: { name: string; progress: Array<{ value: number }> }) => cat.name === "Category 1",
+      // Verify activity with progress
+      const activityWithProgress = response.body.activities.find(
+        (cat: { name: string; progress: Array<{ value: number }> }) => cat.name === "Activity 1",
       );
-      expect(categoryWithProgress.progress[0].value).toBe(10);
-      expect(categoryWithProgress.progress).toHaveLength(1);
+      expect(activityWithProgress.progress[0].value).toBe(10);
+      expect(activityWithProgress.progress).toHaveLength(1);
 
-      // Verify categories without progress
-      const categoriesWithoutProgress = response.body.categories.filter(
-        (cat: { name: string; progress: Array<{ value: number }> }) => cat.name !== "Category 1",
+      // Verify activities without progress
+      const activitiesWithoutProgress = response.body.activities.filter(
+        (cat: { name: string; progress: Array<{ value: number }> }) => cat.name !== "Activity 1",
       );
-      categoriesWithoutProgress.forEach(
+      activitiesWithoutProgress.forEach(
         (cat: { name: string; progress: Array<{ value: number }> }) => {
           expect(cat.progress).toHaveLength(0);
         },
@@ -267,35 +302,38 @@ describe("Category Integration Tests", () => {
     });
 
     it("should return 401 if not authenticated", async () => {
-      const response = await request(app).get("/api/categories").expect(401);
+      const response = await request(app).get("/api/activities").expect(401);
 
       expect(response.body.status).toBe("error");
       expect(response.body.message).toBe("Authentication required");
     });
   });
 
-  describe("DELETE /api/categories/:categoryName/progress", () => {
-    const categoryName = "Test Category";
+  describe("DELETE /api/activities/:activityId/progress", () => {
+    const activityName = "Test Activity";
+    let activityId: string;
 
     beforeEach(async () => {
-      // Create a test category
-      await request(app)
-        .post("/api/categories")
-        .send({ name: categoryName })
+      // Create a test activity
+      const createResponse = await request(app)
+        .post("/api/activities")
+        .send({ name: activityName })
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(201);
 
+      activityId = createResponse.body.newActivity._id;
+
       // Add some progress entries
       await request(app)
-        .post(`/api/categories/${categoryName}/progress`)
+        .post(`/api/activities/${activityId}/progress`)
         .send({ value: 10, notes: "First entry" })
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(200);
 
       await request(app)
-        .post(`/api/categories/${categoryName}/progress`)
+        .post(`/api/activities/${activityId}/progress`)
         .send({ value: 20, notes: "Second entry" })
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
@@ -305,56 +343,56 @@ describe("Category Integration Tests", () => {
     it("should delete a progress entry", async () => {
       // First verify the initial state
       const initialResponse = await request(app)
-        .get("/api/categories")
+        .get("/api/activities")
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(200);
 
-      const initialCategory = initialResponse.body.categories.find(
-        (cat: { name: string }) => cat.name === categoryName,
+      const initialActivity = initialResponse.body.activities.find(
+        (act: { name: string }) => act.name === activityName,
       );
-      expect(initialCategory.progress).toHaveLength(2);
+      expect(initialActivity.progress).toHaveLength(2);
 
       // Find the entry with value 20 (the one we want to delete)
-      const entryToDelete = initialCategory.progress.find(
+      const entryToDelete = initialActivity.progress.find(
         (entry: { value: number }) => entry.value === 20,
       );
       expect(entryToDelete).toBeDefined();
 
       // Delete the entry with value 20
       const response = await request(app)
-        .delete(`/api/categories/${categoryName}/progress`)
+        .delete(`/api/activities/${activityId}/progress`)
         .send({ progressIndex: 0 })
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(200);
 
       expect(response.body.status).toBe("success");
-      expect(response.body.updatedCategory.name).toBe(categoryName);
-      expect(response.body.updatedCategory.progress).toHaveLength(1);
+      expect(response.body.updatedActivity.name).toBe(activityName);
+      expect(response.body.updatedActivity.progress).toHaveLength(1);
 
       // Verify the remaining entry is the one with value 10
-      const remainingEntry = response.body.updatedCategory.progress[0];
+      const remainingEntry = response.body.updatedActivity.progress[0];
       expect(remainingEntry.value).toBe(10);
       expect(remainingEntry.notes).toBe("First entry");
-      expect(response.body.updatedCategory.count).toBe(10); // Total count should be updated
+      expect(response.body.updatedActivity.count).toBe(10); // Total count should be updated
     });
 
-    it("should return 404 if category is not found", async () => {
+    it("should return 404 if activity is not found", async () => {
       const response = await request(app)
-        .delete("/api/categories/nonexistent/progress")
+        .delete("/api/activities/000000000000000000000000/progress")
         .send({ progressIndex: 0 })
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
         .expect(404);
 
       expect(response.body.status).toBe("error");
-      expect(response.body.message).toBe("Category not found");
+      expect(response.body.message).toBe("Activity not found");
     });
 
     it("should return 404 if progress entry is not found", async () => {
       const response = await request(app)
-        .delete(`/api/categories/${categoryName}/progress`)
+        .delete(`/api/activities/${activityId}/progress`)
         .send({ progressIndex: 5 }) // Non-existent index
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)
@@ -366,7 +404,7 @@ describe("Category Integration Tests", () => {
 
     it("should return 401 if not authenticated", async () => {
       const response = await request(app)
-        .delete(`/api/categories/${categoryName}/progress`)
+        .delete(`/api/activities/${activityId}/progress`)
         .send({ progressIndex: 0 })
         .expect(401);
 
@@ -376,7 +414,7 @@ describe("Category Integration Tests", () => {
 
     it("should return 400 if progressIndex is missing", async () => {
       const response = await request(app)
-        .delete(`/api/categories/${categoryName}/progress`)
+        .delete(`/api/activities/${activityId}/progress`)
         .send({})
         .set("Cookie", [`session=${sessionToken}`])
         .set("x-csrf-token", csrfToken)

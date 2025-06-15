@@ -6,7 +6,7 @@ import express, { Request, Response } from "express";
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import categoryRoutes from "./routes/categoryRoutes";
+import activityRoutes from "./routes/activityRoutes";
 import authRoutes from "./routes/auth";
 import { startSessionCleanupJob } from "./utils/sessionCleanup";
 
@@ -34,7 +34,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 // Routes
-app.use("/api/categories", categoryRoutes);
+app.use("/api/activities", activityRoutes);
 app.use("/api/auth", authRoutes);
 
 // Error handling middleware

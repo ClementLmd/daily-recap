@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 import argon2 from "argon2";
 
 export interface ProgressEntry {
@@ -7,18 +7,19 @@ export interface ProgressEntry {
   notes?: string;
 }
 
-export interface Category {
-  _id: string;
+export interface Activity {
+  _id: Types.ObjectId;
   name: string;
-  progress: ProgressEntry[];
   count: number;
+  progress: ProgressEntry[];
 }
 
 export interface IUser extends Document {
+  _id: Types.ObjectId;
   email: string;
   password: string;
   name: string;
-  categories: Category[];
+  activities: Activity[];
   createdAt: Date;
   updatedAt: Date;
   lastLoginAt: Date;
@@ -26,9 +27,9 @@ export interface IUser extends Document {
   lastFailedLoginAt: Date;
   isLocked: boolean;
   comparePassword(candidatePassword: string): Promise<boolean>;
-  addCategory(name: string): Promise<IUser>;
-  addProgress(categoryName: string, value: number, notes?: string): Promise<IUser>;
-  getProgressInRange(categoryName: string, startDate: Date, endDate: Date): ProgressEntry[];
+  addActivity(name: string): Promise<IUser>;
+  addProgress(activityName: string, value: number, notes?: string): Promise<IUser>;
+  getProgressInRange(activityName: string, startDate: Date, endDate: Date): ProgressEntry[];
 }
 
 const progressEntrySchema = new Schema<ProgressEntry>({
@@ -48,37 +49,37 @@ const progressEntrySchema = new Schema<ProgressEntry>({
   },
 });
 
-const categorySchema = new Schema<Category>({
+const activitySchema = new Schema<Activity>({
   name: {
     type: String,
-    required: [true, "Category name is required"],
+    required: [true, "Activity name is required"],
     trim: true,
   },
-  progress: [progressEntrySchema],
   count: {
     type: Number,
     default: 0,
   },
+  progress: [progressEntrySchema],
 });
 
 const userSchema = new Schema<IUser>(
   {
     email: {
       type: String,
-      required: true,
+      required: [true, "Email is required"],
       unique: true,
       trim: true,
       lowercase: true,
     },
     password: {
       type: String,
-      required: true,
+      required: [true, "Password is required"],
     },
     name: {
       type: String,
       trim: true,
     },
-    categories: [categorySchema],
+    activities: [activitySchema],
     lastLoginAt: {
       type: Date,
       default: null,
@@ -122,32 +123,38 @@ userSchema.methods.comparePassword = async function (candidatePassword: string):
   }
 };
 
-// Add category method
-userSchema.methods.addCategory = async function (name: string): Promise<IUser> {
-  // Check if category with same name exists
-  const existingCategory = this.categories.find((cat: Category) => cat.name === name);
-  if (existingCategory) {
-    throw new Error("A category with this name already exists");
+// Add activity method
+userSchema.methods.addActivity = async function (name: string): Promise<IUser> {
+  // Check if activity with same name exists
+  const existingActivity = this.activities.find((act: Activity) => act.name === name);
+  if (existingActivity) {
+    throw new Error("An activity with this name already exists");
   }
 
-  this.categories.push({ name, progress: [] });
+  this.activities.push({
+    _id: new Types.ObjectId(),
+    name,
+    count: 0,
+    progress: [],
+  });
+
   return this.save();
 };
 
 // Add progress method
 userSchema.methods.addProgress = async function (
-  categoryName: string,
+  activityName: string,
   value: number,
   notes?: string,
 ): Promise<IUser> {
-  const category = this.categories.find((cat: Category) => cat.name === categoryName);
-  if (!category) {
-    throw new Error("Category not found");
+  const activity = this.activities.find((act: Activity) => act.name === activityName);
+  if (!activity) {
+    throw new Error("Activity not found");
   }
 
-  category.progress.push({
-    value,
+  activity.progress.push({
     date: new Date(),
+    value,
     notes,
   });
 
@@ -156,16 +163,16 @@ userSchema.methods.addProgress = async function (
 
 // Get progress in range method
 userSchema.methods.getProgressInRange = function (
-  categoryName: string,
+  activityName: string,
   startDate: Date,
   endDate: Date,
 ): ProgressEntry[] {
-  const category = this.categories.find((cat: Category) => cat.name === categoryName);
-  if (!category) {
-    throw new Error("Category not found");
+  const activity = this.activities.find((act: Activity) => act.name === activityName);
+  if (!activity) {
+    throw new Error("Activity not found");
   }
 
-  return category.progress.filter(
+  return activity.progress.filter(
     (entry: ProgressEntry) => entry.date >= startDate && entry.date <= endDate,
   );
 };

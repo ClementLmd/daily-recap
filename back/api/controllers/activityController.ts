@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { getCategories } from "../useCases/category/getCategories";
-import { addCategory } from "../useCases/category/addCategory";
-import { deleteCategory } from "../useCases/category/deleteCategory";
-import { updateProgress } from "../useCases/category/updateProgress";
-import { deleteProgress } from "../useCases/category/deleteProgress";
+import { updateProgress } from "../useCases/activity/updateProgress";
+import { deleteProgress } from "../useCases/activity/deleteProgress";
 import { IUser } from "../models/User";
+import { getActivities } from "../useCases/activity/getActivities";
+import { addActivity } from "../useCases/activity/addActivity";
+import { deleteActivity } from "../useCases/activity/deleteActivity";
 
 interface CustomError extends Error {
   message: string;
@@ -14,9 +14,9 @@ interface AuthenticatedRequest extends Request {
   user?: IUser;
 }
 
-export const categoryController = {
-  // Get all categories for the authenticated user
-  getCategories: async (req: AuthenticatedRequest, res: Response) => {
+export const activityController = {
+  // Get all activities
+  getActivities: async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.user?._id) {
         return res.status(401).json({
@@ -24,21 +24,23 @@ export const categoryController = {
           message: "User not authenticated",
         });
       }
-      const categories = await getCategories(req.user._id.toString());
+
+      const activities = await getActivities(req.user._id.toString());
       res.json({
         status: "success",
-        categories,
+        activities,
       });
     } catch (error) {
+      const customError = error as CustomError;
       res.status(500).json({
         status: "error",
-        message: "Failed to get categories",
+        message: customError.message || "Failed to fetch activities",
       });
     }
   },
 
-  // Add a new category
-  addCategory: async (req: AuthenticatedRequest, res: Response) => {
+  // Add a new activity
+  addActivity: async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.user?._id) {
         return res.status(401).json({
@@ -46,22 +48,23 @@ export const categoryController = {
           message: "User not authenticated",
         });
       }
-      const { name } = req.body as { name: string };
-      const newCategory = await addCategory(req.user._id.toString(), name);
+
+      const { name } = req.body;
+      const newActivity = await addActivity(req.user._id.toString(), name);
 
       res.status(201).json({
         status: "success",
-        newCategory,
+        newActivity,
       });
     } catch (error) {
       const customError = error as CustomError;
-      if (customError.message === "Category name is required") {
+      if (customError.message === "Activity name is required") {
         return res.status(400).json({
           status: "error",
           message: customError.message,
         });
       }
-      if (customError.message === "A category with this name already exists") {
+      if (customError.message === "An activity with this name already exists") {
         return res.status(409).json({
           status: "error",
           message: customError.message,
@@ -69,13 +72,13 @@ export const categoryController = {
       }
       res.status(500).json({
         status: "error",
-        message: "Failed to add category",
+        message: customError.message || "Failed to add activity",
       });
     }
   },
 
-  // Delete a category
-  deleteCategory: async (req: AuthenticatedRequest, res: Response) => {
+  // Delete an activity
+  deleteActivity: async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.user?._id) {
         return res.status(401).json({
@@ -83,16 +86,17 @@ export const categoryController = {
           message: "User not authenticated",
         });
       }
-      const { categoryId } = req.params as { categoryId: string };
-      await deleteCategory(req.user._id.toString(), categoryId);
+
+      const { activityId } = req.params;
+      await deleteActivity(req.user._id.toString(), activityId);
 
       res.json({
         status: "success",
-        message: "Category deleted successfully",
+        message: "Activity deleted successfully",
       });
     } catch (error) {
       const customError = error as CustomError;
-      if (customError.message === "Category not found") {
+      if (customError.message === "Activity not found") {
         return res.status(404).json({
           status: "error",
           message: customError.message,
@@ -100,12 +104,12 @@ export const categoryController = {
       }
       res.status(500).json({
         status: "error",
-        message: "Failed to delete category",
+        message: customError.message || "Failed to delete activity",
       });
     }
   },
 
-  // Update category progress
+  // Update activity progress
   updateProgress: async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.user?._id) {
@@ -114,19 +118,20 @@ export const categoryController = {
           message: "User not authenticated",
         });
       }
-      const { categoryId } = req.params as { categoryId: string };
-      const { value, notes } = req.body as { value: number; notes?: string };
 
-      const updatedCategory = await updateProgress(
+      const { activityId } = req.params;
+      const { value, notes } = req.body;
+
+      const updatedActivity = await updateProgress(
         req.user._id.toString(),
-        categoryId,
+        activityId,
         value,
         notes,
       );
 
       res.json({
         status: "success",
-        updatedCategory,
+        updatedActivity,
       });
     } catch (error) {
       const customError = error as CustomError;
@@ -136,7 +141,7 @@ export const categoryController = {
           message: customError.message,
         });
       }
-      if (customError.message === "Category not found") {
+      if (customError.message === "Activity not found") {
         return res.status(404).json({
           status: "error",
           message: customError.message,
@@ -144,7 +149,7 @@ export const categoryController = {
       }
       res.status(500).json({
         status: "error",
-        message: "Failed to update progress",
+        message: customError.message || "Failed to update progress",
       });
     }
   },
@@ -158,25 +163,26 @@ export const categoryController = {
           message: "User not authenticated",
         });
       }
-      const { categoryName } = req.params as { categoryName: string };
-      const { progressIndex } = req.body as { progressIndex: number };
 
-      if (typeof progressIndex !== "number") {
+      const { activityId } = req.params;
+      const { progressIndex } = req.body;
+
+      if (progressIndex === undefined) {
         return res.status(400).json({
           status: "error",
           message: "Progress index is required",
         });
       }
 
-      const updatedCategory = await deleteProgress(
+      const updatedActivity = await deleteProgress(
         req.user._id.toString(),
-        categoryName,
+        activityId,
         progressIndex,
       );
 
       res.json({
         status: "success",
-        updatedCategory,
+        updatedActivity,
       });
     } catch (error) {
       const customError = error as CustomError;
@@ -186,7 +192,7 @@ export const categoryController = {
           message: customError.message,
         });
       }
-      if (customError.message === "Category not found") {
+      if (customError.message === "Activity not found") {
         return res.status(404).json({
           status: "error",
           message: customError.message,
@@ -194,7 +200,7 @@ export const categoryController = {
       }
       res.status(500).json({
         status: "error",
-        message: "Failed to delete progress entry",
+        message: customError.message || "Failed to delete progress entry",
       });
     }
   },

@@ -60,10 +60,10 @@ export const deleteActivity = createAsyncThunk(
 
 export const deleteProgress = createAsyncThunk(
   "activities/deleteProgress",
-  async (payload: { activityName: string; progressIndex: number }, { getState }) => {
+  async (payload: { activityId: string; progressIndex: number }, { getState }) => {
     const state = getState() as RootState;
     const response = await api.deleteProgress(
-      payload.activityName,
+      payload.activityId,
       payload.progressIndex,
       state.auth.csrfToken,
     );

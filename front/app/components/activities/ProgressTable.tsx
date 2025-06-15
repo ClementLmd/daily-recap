@@ -5,16 +5,16 @@ import { AppDispatch } from "../../store/store";
 
 interface ProgressTableProps {
   progress: ProgressEntry[];
-  activityName: string;
+  activityId: string;
 }
 
-export default function ProgressTable({ progress, activityName }: ProgressTableProps) {
+export default function ProgressTable({ progress, activityId }: ProgressTableProps) {
   const dispatch = useDispatch<AppDispatch>();
 
   const handleDelete = async (index: number) => {
     if (window.confirm("Are you sure you want to delete this entry?")) {
       const actualIndex = progress.length - 1 - index;
-      await dispatch(deleteProgress({ activityName, progressIndex: actualIndex }));
+      await dispatch(deleteProgress({ activityId, progressIndex: actualIndex }));
     }
   };
 
