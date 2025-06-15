@@ -3,33 +3,33 @@
 import { useParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../store/store";
-import { fetchCategories } from "../../store/categories.thunks";
-import ProgressTable from "../../components/categories/ProgressTable";
-import ProgressGraph from "../../components/categories/ProgressGraph";
+import ProgressTable from "../../components/activities/ProgressTable";
+import ProgressGraph from "../../components/activities/ProgressGraph";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import CategoryStats from "../../components/categories/CategoryStats";
+import { fetchActivities } from "../../store/activities.thunks";
+import ActivityStats from "../../components/activities/ActivityStats";
 
 export default function CategoryPage() {
   const params = useParams();
   const dispatch = useDispatch<AppDispatch>();
-  const categoryName = decodeURIComponent(params.name as string);
+  const activityName = decodeURIComponent(params.name as string);
   const [viewMode, setViewMode] = useState<"table" | "graph">("table");
 
   // Fetch latest data when page loads
   useEffect(() => {
-    dispatch(fetchCategories());
+    dispatch(fetchActivities());
   }, [dispatch]);
 
-  const category = useSelector((state: RootState) =>
-    state.categories.categories.find((cat) => cat.name === categoryName),
+  const activity = useSelector((state: RootState) =>
+    state.activities.activities.find((act) => act.name === activityName),
   );
 
-  if (!category) {
+  if (!activity) {
     return (
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">Category Not Found</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">Activity Not Found</h1>
           <Link
             href="/dashboard"
             className="block text-center text-blue-600 hover:text-blue-800 hover:underline"
@@ -45,21 +45,21 @@ export default function CategoryPage() {
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">{category.name}</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{activity.name}</h1>
           <Link href="/dashboard" className="text-blue-600 hover:text-blue-800 hover:underline">
             ← Back
           </Link>
         </div>
 
         <div className="space-y-6">
-          <CategoryStats totalCount={category.count} progress={category.progress} />
+          <ActivityStats totalCount={activity.count} progress={activity.progress} />
 
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <div className="mb-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">Progress History</h2>
-                  <p className="text-sm text-gray-500">Total entries: {category.progress.length}</p>
+                  <p className="text-sm text-gray-500">Total entries: {activity.progress.length}</p>
                 </div>
                 <div className="flex space-x-2">
                   <button
@@ -87,9 +87,9 @@ export default function CategoryPage() {
             </div>
 
             {viewMode === "table" ? (
-              <ProgressTable progress={category.progress} categoryName={category.name} />
+              <ProgressTable progress={activity.progress} activityName={activity.name} />
             ) : (
-              <ProgressGraph progress={category.progress} />
+              <ProgressGraph progress={activity.progress} />
             )}
           </div>
         </div>

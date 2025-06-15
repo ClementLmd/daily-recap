@@ -3,7 +3,7 @@ export const ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",
   DASHBOARD: "/dashboard",
-  CATEGORY: "/category",
+  ACTIVITY: "/activity",
 } as const;
 
 // Simple helper to check if a path is public

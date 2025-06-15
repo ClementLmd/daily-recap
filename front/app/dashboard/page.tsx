@@ -1,59 +1,33 @@
 "use client";
 
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import CategoryForm from "../components/categories/CategoryForm";
-import CategoryList from "../components/categories/CategoryList";
-import { useRouter } from "next/navigation";
-import { logout } from "../store/auth.thunks";
-import { addCategory } from "../store/categories.thunks";
+import { addActivity } from "../store/activities.thunks";
+import { useAppDispatch } from "../store/hooks";
+import ActivityForm from "../components/activities/ActivityForm";
+import ActivityList from "../components/activities/ActivityList";
 
-export default function Dashboard() {
+export default function DashboardPage() {
   const dispatch = useAppDispatch();
-  const router = useRouter();
-  const { loading } = useAppSelector((state) => state.auth);
 
-  const handleAddCategory = (categoryName: string) => {
-    dispatch(addCategory(categoryName));
+  const handleAddActivity = (activityName: string) => {
+    dispatch(addActivity(activityName));
   };
-
-  const handleLogout = async () => {
-    try {
-      await dispatch(logout()).unwrap();
-      router.push("/");
-    } catch (error) {
-      console.error("Logout failed:", error);
-      router.push("/login");
-    }
-  };
-
-  // Show loading state while checking authentication
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            Logout
-          </button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="mt-2 text-gray-600">
+            Track your daily activities and monitor your progress over time.
+          </p>
         </div>
-        <div className="max-w-2xl mx-auto space-y-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <CategoryForm onSubmit={handleAddCategory} />
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <CategoryList />
-          </div>
+
+        <div className="mb-8">
+          <ActivityForm onSubmit={handleAddActivity} />
+        </div>
+
+        <div>
+          <ActivityList />
         </div>
       </div>
     </div>

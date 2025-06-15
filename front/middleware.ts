@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { ROUTES, isPublicPath } from "./app/config/routes";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -22,6 +23,13 @@ export function middleware(request: NextRequest) {
         },
       );
     }
+  }
+
+  // For protected routes, redirect to login if not authenticated
+  if (!isPublicPath(pathname) && !csrfToken) {
+    const loginUrl = new URL(ROUTES.LOGIN, request.url);
+    loginUrl.searchParams.set("from", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
