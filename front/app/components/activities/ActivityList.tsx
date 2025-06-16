@@ -4,10 +4,23 @@ import { AppDispatch, RootState } from "../../store/store";
 import { incrementCount, decrementCount, setCount } from "../../store/activitiesSlice";
 import Link from "next/link";
 import { deleteActivity, fetchActivities, saveProgress } from "../../store/activities.thunks";
+import { isDateInRange } from "../../utils/dateUtils";
+import { Activity, ProgressEntry } from "@/app/store/types";
 
 export default function ActivityList() {
   const dispatch = useDispatch<AppDispatch>();
   const { activities, loading, error } = useSelector((state: RootState) => state.activities);
+
+  const getTodayCount = (activity: Activity) => {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return (
+      activity.progress?.reduce((sum: number, entry: ProgressEntry) => {
+        const entryDate = new Date(entry.date);
+        return isDateInRange(entryDate, todayStart, now) ? sum + entry.value : sum;
+      }, 0) || 0
+    );
+  };
 
   useEffect(() => {
     dispatch(fetchActivities());
@@ -62,6 +75,12 @@ export default function ActivityList() {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent, activityId: string) => {
+    if (e.key === "Enter") {
+      handleDone(activityId);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {activities.map((activity) => (
@@ -78,7 +97,7 @@ export default function ActivityList() {
             </Link>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-500">Total: {activity.count}</span>
-              <span className="text-sm text-gray-500">Today: {activity.tempCount}</span>
+              <span className="text-sm text-gray-500">Today: {getTodayCount(activity)}</span>
               <button
                 onClick={() => handleDelete(activity._id)}
                 className="ml-2 p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
@@ -114,6 +133,7 @@ export default function ActivityList() {
                 min="0"
                 value={activity.tempCount}
                 onChange={(e) => handleCountChange(activity._id, parseInt(e.target.value) || 0)}
+                onKeyDown={(e) => handleKeyDown(e, activity._id)}
                 className="w-20 px-3 py-2 text-center text-gray-800 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
 
@@ -137,6 +157,7 @@ export default function ActivityList() {
               id={`notes-${activity._id}`}
               type="text"
               placeholder="Add notes (optional)"
+              onKeyDown={(e) => handleKeyDown(e, activity._id)}
               className="w-full px-4 py-2 text-sm text-gray-800 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 placeholder-gray-400"
             />
           </div>
