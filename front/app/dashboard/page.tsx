@@ -1,19 +1,19 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import CategoryForm from "../components/categories/CategoryForm";
-import CategoryList from "../components/categories/CategoryList";
+import ActivityForm from "../components/activities/ActivityForm";
+import ActivityList from "../components/activities/ActivityList";
 import { useRouter } from "next/navigation";
 import { logout } from "../store/auth.thunks";
-import { addCategory } from "../store/categories.thunks";
+import { addActivity } from "../store/activities.thunks";
 
 export default function Dashboard() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { loading } = useAppSelector((state) => state.auth);
 
-  const handleAddCategory = (categoryName: string) => {
-    dispatch(addCategory(categoryName));
+  const handleAddActivity = (activityName: string) => {
+    dispatch(addActivity(activityName));
   };
 
   const handleLogout = async () => {
@@ -49,10 +49,10 @@ export default function Dashboard() {
         </div>
         <div className="max-w-2xl mx-auto space-y-8">
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <CategoryForm onSubmit={handleAddCategory} />
+            <ActivityForm onSubmit={handleAddActivity} />
           </div>
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <CategoryList />
+            <ActivityList />
           </div>
         </div>
       </div>

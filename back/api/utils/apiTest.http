@@ -1,8 +1,8 @@
 //hello world
 # GET http://localhost:5000/
 
-//add category
-POST http://localhost:5000/api/categories
+//add activity
+POST http://localhost:5000/api/activities
 Content-Type: application/json
 
 {
@@ -10,7 +10,7 @@ Content-Type: application/json
 }
 
 //add progress
-# POST http://localhost:5000/api/categories/682c441279f021a5ffc4c531/progress
+# POST http://localhost:5000/api/activities/682c441279f021a5ffc4c531/progress
 # Content-Type: application/json
 
 # {

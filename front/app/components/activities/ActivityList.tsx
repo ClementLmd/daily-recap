@@ -1,54 +1,54 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store/store";
-import { incrementCount, decrementCount, setCount } from "../../store/categoriesSlice";
+import { incrementCount, decrementCount, setCount } from "../../store/activitiesSlice";
 import Link from "next/link";
-import { deleteCategory, fetchCategories, saveProgress } from "../../store/categories.thunks";
+import { deleteActivity, fetchActivities, saveProgress } from "../../store/activities.thunks";
 
-export default function CategoryList() {
+export default function ActivityList() {
   const dispatch = useDispatch<AppDispatch>();
-  const { categories, loading, error } = useSelector((state: RootState) => state.categories);
+  const { activities, loading, error } = useSelector((state: RootState) => state.activities);
 
   useEffect(() => {
-    dispatch(fetchCategories());
+    dispatch(fetchActivities());
   }, [dispatch]);
 
   if (loading) {
-    return <div className="text-center py-8">Loading categories...</div>;
+    return <div className="text-center py-8">Loading activities...</div>;
   }
 
   if (error) {
     return <div className="text-center py-8 text-red-500">{error}</div>;
   }
 
-  if (categories.length === 0) {
+  if (activities.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-gray-500 text-lg">
-          No categories yet. Add some categories to get started!
+          No activities yet. Add some activities to get started!
         </p>
       </div>
     );
   }
 
-  const handleIncrement = (categoryId: string) => {
-    dispatch(incrementCount(categoryId));
+  const handleIncrement = (activityId: string) => {
+    dispatch(incrementCount(activityId));
   };
 
-  const handleDecrement = (categoryId: string) => {
-    dispatch(decrementCount(categoryId));
+  const handleDecrement = (activityId: string) => {
+    dispatch(decrementCount(activityId));
   };
 
-  const handleCountChange = (categoryId: string, value: number) => {
-    dispatch(setCount({ categoryId, value }));
+  const handleCountChange = (activityId: string, value: number) => {
+    dispatch(setCount({ activityId, value }));
   };
 
-  const handleDone = async (categoryId: string) => {
-    const category = categories.find((cat) => cat._id === categoryId);
-    if (category && category.tempCount > 0) {
-      const notesInput = document.getElementById(`notes-${categoryId}`) as HTMLInputElement;
+  const handleDone = async (activityId: string) => {
+    const activity = activities.find((cat) => cat._id === activityId);
+    if (activity && activity.tempCount > 0) {
+      const notesInput = document.getElementById(`notes-${activityId}`) as HTMLInputElement;
       const notes = notesInput?.value || "";
-      await dispatch(saveProgress({ categoryId, count: category.tempCount, notes }));
+      await dispatch(saveProgress({ activityId, count: activity.tempCount, notes }));
       // Clear the notes input
       if (notesInput) {
         notesInput.value = "";
@@ -56,33 +56,33 @@ export default function CategoryList() {
     }
   };
 
-  const handleDelete = async (categoryId: string) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
-      await dispatch(deleteCategory(categoryId));
+  const handleDelete = async (activityId: string) => {
+    if (window.confirm("Are you sure you want to delete this activity?")) {
+      await dispatch(deleteActivity(activityId));
     }
   };
 
   return (
     <div className="space-y-4">
-      {categories.map((category) => (
+      {activities.map((activity) => (
         <div
-          key={category._id}
+          key={activity._id}
           className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
         >
           <div className="flex items-center justify-between">
             <Link
-              href={`/category/${encodeURIComponent(category.name)}`}
+              href={`/activity/${encodeURIComponent(activity.name)}`}
               className="text-lg font-medium text-blue-600 hover:text-blue-800 hover:underline"
             >
-              {category.name}
+              {activity.name}
             </Link>
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500">Total: {category.count}</span>
-              <span className="text-sm text-gray-500">Today: {category.tempCount}</span>
+              <span className="text-sm text-gray-500">Total: {activity.count}</span>
+              <span className="text-sm text-gray-500">Today: {activity.tempCount}</span>
               <button
-                onClick={() => handleDelete(category._id)}
+                onClick={() => handleDelete(activity._id)}
                 className="ml-2 p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
-                title="Delete category"
+                title="Delete activity"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +103,7 @@ export default function CategoryList() {
           <div className="mt-4 space-y-2">
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => handleDecrement(category._id)}
+                onClick={() => handleDecrement(activity._id)}
                 className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
               >
                 -
@@ -112,21 +112,21 @@ export default function CategoryList() {
               <input
                 type="number"
                 min="0"
-                value={category.tempCount}
-                onChange={(e) => handleCountChange(category._id, parseInt(e.target.value) || 0)}
+                value={activity.tempCount}
+                onChange={(e) => handleCountChange(activity._id, parseInt(e.target.value) || 0)}
                 className="w-20 px-3 py-2 text-center text-gray-800 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
 
               <button
-                onClick={() => handleIncrement(category._id)}
+                onClick={() => handleIncrement(activity._id)}
                 className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
               >
                 +
               </button>
 
               <button
-                onClick={() => handleDone(category._id)}
-                disabled={category.tempCount === 0}
+                onClick={() => handleDone(activity._id)}
+                disabled={activity.tempCount === 0}
                 className="ml-auto px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Done
@@ -134,7 +134,7 @@ export default function CategoryList() {
             </div>
 
             <input
-              id={`notes-${category._id}`}
+              id={`notes-${activity._id}`}
               type="text"
               placeholder="Add notes (optional)"
               className="w-full px-4 py-2 text-sm text-gray-800 bg-white border-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 placeholder-gray-400"

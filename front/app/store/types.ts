@@ -18,7 +18,7 @@ export interface ProgressEntry {
   notes?: string;
 }
 
-export interface Category {
+export interface Activity {
   _id: string;
   name: string;
   count: number;
@@ -26,14 +26,14 @@ export interface Category {
   progress: ProgressEntry[];
 }
 
-export interface CategoriesState {
-  categories: Category[];
+export interface ActivitiesState {
+  activities: Activity[];
   loading: boolean;
   error: string | null;
 }
 
 export interface SaveProgressPayload {
-  categoryId: string;
+  activityId: string;
   count: number;
   notes?: string;
 }
