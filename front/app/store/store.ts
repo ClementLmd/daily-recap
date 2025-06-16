@@ -1,10 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import categoriesReducer from "./categoriesSlice";
+import activitiesReducer from "./activitiesSlice";
 import authReducer from "./authSlice";
-import { CategoriesState } from "./types";
+import { ActivitiesState } from "./types";
 
-const initialState: CategoriesState = {
-  categories: [],
+const initialState: ActivitiesState = {
+  activities: [],
   loading: false,
   error: null,
 };
@@ -14,16 +14,16 @@ const loadPersistedState = () => {
   if (typeof window === "undefined") {
     return {
       auth: undefined,
-      categories: initialState,
+      activities: initialState,
     };
   }
 
   try {
     const persistedAuth = localStorage.getItem("authState");
-    const persistedCategories = localStorage.getItem("categoriesState");
+    const persistedActivities = localStorage.getItem("activitiesState");
 
     let authState = persistedAuth ? JSON.parse(persistedAuth) : undefined;
-    const categoriesState = persistedCategories ? JSON.parse(persistedCategories) : undefined;
+    const activitiesState = persistedActivities ? JSON.parse(persistedActivities) : undefined;
 
     // Only restore auth if we have both user and csrfToken
     if (authState && !(authState.user && authState.csrfToken)) {
@@ -32,13 +32,13 @@ const loadPersistedState = () => {
 
     return {
       auth: authState,
-      categories: categoriesState || initialState,
+      activities: activitiesState || initialState,
     };
   } catch (error) {
     console.error("Error loading persisted state:", error);
     return {
       auth: undefined,
-      categories: initialState,
+      activities: initialState,
     };
   }
 };
@@ -48,7 +48,7 @@ const makeStore = () => {
 
   return configureStore({
     reducer: {
-      categories: categoriesReducer,
+      activities: activitiesReducer,
       auth: authReducer,
     },
     preloadedState: persistedState,
@@ -71,12 +71,12 @@ if (typeof window !== "undefined") {
       // Persist auth state
       if (state.auth.user && state.auth.csrfToken) {
         localStorage.setItem("authState", JSON.stringify(state.auth));
-        // Only persist categories when user is authenticated
-        localStorage.setItem("categoriesState", JSON.stringify(state.categories));
+        // Only persist activities when user is authenticated
+        localStorage.setItem("activitiesState", JSON.stringify(state.activities));
       } else {
-        // Clear both auth and categories when user is not authenticated
+        // Clear both auth and activities when user is not authenticated
         localStorage.removeItem("authState");
-        localStorage.removeItem("categoriesState");
+        localStorage.removeItem("activitiesState");
       }
     } catch (error) {
       console.error("Error persisting state:", error);

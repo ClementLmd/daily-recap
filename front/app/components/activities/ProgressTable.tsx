@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { ProgressEntry } from "../../store/types";
 import { useAppDispatch } from "../../store/hooks";
-import { deleteProgress } from "../../store/categories.thunks";
+import { deleteProgress } from "../../store/activities.thunks";
 
 interface ProgressTableProps {
   progress: ProgressEntry[];
-  categoryName: string;
+  activityName: string;
 }
 
-export default function ProgressTable({ progress, categoryName }: ProgressTableProps) {
+export default function ProgressTable({ progress, activityName }: ProgressTableProps) {
   const dispatch = useAppDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -30,7 +30,7 @@ export default function ProgressTable({ progress, categoryName }: ProgressTableP
     const actualIndex = (currentPage - 1) * itemsPerPage + displayIndex;
 
     if (window.confirm("Are you sure you want to delete this progress entry?")) {
-      await dispatch(deleteProgress({ categoryName, progressIndex: actualIndex }));
+      await dispatch(deleteProgress({ activityName, progressIndex: actualIndex }));
     }
   };
 

@@ -1,17 +1,17 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { api } from "../services/api";
-import { Category, SaveProgressPayload } from "./types";
+import { Activity, SaveProgressPayload } from "./types";
 import { RootState } from "./store";
 
-export const fetchCategories = createAsyncThunk(
-  "categories/fetchCategories",
+export const fetchActivities = createAsyncThunk(
+  "activities/fetchActivities",
   async (_, { getState }) => {
     const state = getState() as RootState;
-    const response = await api.getCategories(state.auth.csrfToken);
+    const response = await api.getActivities(state.auth.csrfToken);
     // Get stored temp counts from localStorage
     const storedTempCounts = JSON.parse(localStorage.getItem("tempCounts") || "{}");
 
-    return (response.apiResponseData.categories || []).map((cat: Category) => ({
+    return (response.apiResponseData.activities || []).map((cat: Activity) => ({
       _id: cat._id,
       name: cat.name,
       count: cat.count,
@@ -21,14 +21,14 @@ export const fetchCategories = createAsyncThunk(
   },
 );
 
-export const addCategory = createAsyncThunk(
-  "categories/addCategory",
+export const addActivity = createAsyncThunk(
+  "activities/addActivity",
   async (name: string, { getState }) => {
     const state = getState() as RootState;
-    const response = await api.addCategory(name, state.auth.csrfToken);
-    if (response.apiResponseData.newCategory) {
+    const response = await api.addActivity(name, state.auth.csrfToken);
+    if (response.apiResponseData.newActivity) {
       return {
-        ...response.apiResponseData.newCategory,
+        ...response.apiResponseData.newActivity,
         tempCount: 0,
       };
     }
@@ -37,36 +37,36 @@ export const addCategory = createAsyncThunk(
 );
 
 export const saveProgress = createAsyncThunk(
-  "categories/saveProgress",
+  "activities/saveProgress",
   async (payload: SaveProgressPayload, { getState }) => {
     const state = getState() as RootState;
     const response = await api.saveProgress(payload, state.auth.csrfToken);
     return {
-      categoryId: response.apiResponseData.updatedCategory?._id || payload.categoryId,
-      count: response.apiResponseData.updatedCategory?.count || 0,
+      activityId: response.apiResponseData.updatedActivity?._id || payload.activityId,
+      count: response.apiResponseData.updatedActivity?.count || 0,
       notes: payload.notes,
     };
   },
 );
 
-export const deleteCategory = createAsyncThunk(
-  "categories/deleteCategory",
-  async (categoryId: string, { getState }) => {
+export const deleteActivity = createAsyncThunk(
+  "activities/deleteActivity",
+  async (activityId: string, { getState }) => {
     const state = getState() as RootState;
-    await api.deleteCategory(categoryId, state.auth.csrfToken);
-    return categoryId;
+    await api.deleteActivity(activityId, state.auth.csrfToken);
+    return activityId;
   },
 );
 
 export const deleteProgress = createAsyncThunk(
-  "categories/deleteProgress",
-  async (payload: { categoryName: string; progressIndex: number }, { getState }) => {
+  "activities/deleteProgress",
+  async (payload: { activityName: string; progressIndex: number }, { getState }) => {
     const state = getState() as RootState;
     const response = await api.deleteProgress(
-      payload.categoryName,
+      payload.activityName,
       payload.progressIndex,
       state.auth.csrfToken,
     );
-    return response.apiResponseData.updatedCategory;
+    return response.apiResponseData.updatedActivity;
   },
 );

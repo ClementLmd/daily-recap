@@ -2,7 +2,7 @@ import { User } from "../../models/User";
 
 export const deleteProgress = async (
   userId: string,
-  categoryName: string,
+  activityName: string,
   progressIndex: number,
 ) => {
   const user = await User.findById(userId);
@@ -10,13 +10,13 @@ export const deleteProgress = async (
     throw new Error("User not found");
   }
 
-  const category = user.categories.find((cat) => cat.name === categoryName);
-  if (!category) {
-    throw new Error("Category not found");
+  const activity = user.activities.find((cat) => cat.name === activityName);
+  if (!activity) {
+    throw new Error("Activity not found");
   }
 
   // Sort progress by date, most recent first (same as frontend)
-  const sortedProgress = [...category.progress].sort(
+  const sortedProgress = [...activity.progress].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
@@ -28,7 +28,7 @@ export const deleteProgress = async (
   const entryToDelete = sortedProgress[progressIndex];
 
   // Find the actual index in the original array
-  const actualIndex = category.progress.findIndex(
+  const actualIndex = activity.progress.findIndex(
     (entry) => entry.date === entryToDelete.date && entry.value === entryToDelete.value,
   );
 
@@ -37,12 +37,12 @@ export const deleteProgress = async (
   }
 
   // Subtract the value from the total count
-  category.count -= category.progress[actualIndex].value;
+  activity.count -= activity.progress[actualIndex].value;
 
   // Remove the progress entry
-  category.progress.splice(actualIndex, 1);
+  activity.progress.splice(actualIndex, 1);
 
   await user.save();
 
-  return category;
+  return activity;
 };

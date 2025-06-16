@@ -1,4 +1,4 @@
-import { Category } from "../store/types";
+import { Activity } from "../store/types";
 
 interface ApiResponse<T> {
   apiResponseData: T;
@@ -9,9 +9,9 @@ interface ApiResponse<T> {
 interface BackendResponse<T> {
   status: string;
   data?: T;
-  categories?: Category[];
-  newCategory?: Category;
-  updatedCategory?: Category;
+  activities?: Activity[];
+  newActivity?: Activity;
+  updatedActivity?: Activity;
 }
 
 class Api {
@@ -53,11 +53,11 @@ class Api {
     };
   }
 
-  async getCategories(
+  async getActivities(
     csrfToken?: string | null,
-  ): Promise<ApiResponse<BackendResponse<Category[]>>> {
-    return this.request<BackendResponse<Category[]>>(
-      "/categories",
+  ): Promise<ApiResponse<BackendResponse<Activity[]>>> {
+    return this.request<BackendResponse<Activity[]>>(
+      "/activities",
       {
         method: "GET",
       },
@@ -65,12 +65,12 @@ class Api {
     );
   }
 
-  async addCategory(
+  async addActivity(
     name: string,
     csrfToken?: string | null,
-  ): Promise<ApiResponse<BackendResponse<Category>>> {
-    return this.request<BackendResponse<Category>>(
-      "/categories",
+  ): Promise<ApiResponse<BackendResponse<Activity>>> {
+    return this.request<BackendResponse<Activity>>(
+      "/activities",
       {
         method: "POST",
         body: JSON.stringify({ name }),
@@ -80,20 +80,20 @@ class Api {
   }
 
   async saveProgress(
-    payload: { categoryId: string; count: number; notes?: string },
+    payload: { activityId: string; count: number; notes?: string },
     csrfToken?: string | null,
-  ): Promise<ApiResponse<BackendResponse<Category>>> {
-    // Get the category name from the store
-    const category = (await this.getCategories(csrfToken)).apiResponseData.categories?.find(
-      (cat) => cat._id === payload.categoryId,
+  ): Promise<ApiResponse<BackendResponse<Activity>>> {
+    // Get the activity name from the store
+    const activity = (await this.getActivities(csrfToken)).apiResponseData.activities?.find(
+      (cat) => cat._id === payload.activityId,
     );
 
-    if (!category) {
-      throw new Error("Category not found");
+    if (!activity) {
+      throw new Error("Activity not found");
     }
 
-    return this.request<BackendResponse<Category>>(
-      `/categories/${encodeURIComponent(category.name)}/progress`,
+    return this.request<BackendResponse<Activity>>(
+      `/activities/${encodeURIComponent(activity.name)}/progress`,
       {
         method: "POST",
         body: JSON.stringify({
@@ -105,12 +105,12 @@ class Api {
     );
   }
 
-  async deleteCategory(
-    categoryId: string,
+  async deleteActivity(
+    activityId: string,
     csrfToken?: string | null,
   ): Promise<ApiResponse<BackendResponse<void>>> {
     return this.request<BackendResponse<void>>(
-      `/categories/${categoryId}`,
+      `/activities/${activityId}`,
       {
         method: "DELETE",
       },
@@ -119,12 +119,12 @@ class Api {
   }
 
   async deleteProgress(
-    categoryName: string,
+    activityName: string,
     progressIndex: number,
     csrfToken?: string | null,
-  ): Promise<ApiResponse<BackendResponse<Category>>> {
-    return this.request<BackendResponse<Category>>(
-      `/categories/${encodeURIComponent(categoryName)}/progress`,
+  ): Promise<ApiResponse<BackendResponse<Activity>>> {
+    return this.request<BackendResponse<Activity>>(
+      `/activities/${encodeURIComponent(activityName)}/progress`,
       {
         method: "DELETE",
         body: JSON.stringify({ progressIndex }),

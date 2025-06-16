@@ -2,7 +2,7 @@ import { User, ProgressEntry } from "../../models/User";
 
 export const updateProgress = async (
   userId: string,
-  categoryName: string,
+  activityName: string,
   value: number,
   notes?: string,
 ) => {
@@ -15,10 +15,10 @@ export const updateProgress = async (
     throw new Error("User not found");
   }
 
-  const category = user.categories.find((cat) => cat.name === categoryName);
+  const activity = user.activities.find((cat) => cat.name === activityName);
 
-  if (!category) {
-    throw new Error("Category not found");
+  if (!activity) {
+    throw new Error("Activity not found");
   }
 
   const newProgress: ProgressEntry = {
@@ -28,9 +28,9 @@ export const updateProgress = async (
   };
 
   // Update the total count
-  category.count += value;
-  category.progress.push(newProgress);
+  activity.count += value;
+  activity.progress.push(newProgress);
   await user.save();
 
-  return category;
+  return activity;
 };

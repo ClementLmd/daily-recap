@@ -1,12 +1,12 @@
 import { getWeekStart, getMonthStart, isDateInRange } from "../../utils/dateUtils";
 import { ProgressEntry } from "../../store/types";
 
-interface CategoryStatsProps {
+interface ActivityStatsProps {
   totalCount: number;
   progress: ProgressEntry[];
 }
 
-export default function CategoryStats({ totalCount, progress }: CategoryStatsProps) {
+export default function ActivityStats({ totalCount, progress }: ActivityStatsProps) {
   const now = new Date();
   const weekStart = getWeekStart(now);
   const monthStart = getMonthStart(now);
